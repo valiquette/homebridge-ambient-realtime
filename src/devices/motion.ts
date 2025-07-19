@@ -3,21 +3,21 @@ import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } 
 import type { ambientPlatform } from '../ambient_platform.js';
 
 export class motionSensor {
-  public readonly Service!: typeof Service;
-  public readonly Characteristic!: typeof Characteristic;
-  constructor(
+	public readonly Service!: typeof Service;
+	public readonly Characteristic!: typeof Characteristic;
+	constructor(
 		private readonly platform: ambientPlatform,
-  ){}
-  createAccessory(device: any, uuid: string, motionSensor: PlatformAccessory, newSensor: any) {
-    const value = device.lastData[newSensor.dataPoint];
-    const motion = value>newSensor.threshold ? true : false;
+	){}
+	createAccessory(device: any, uuid: string, motionSensor: PlatformAccessory, newSensor: any) {
+		const value = device.lastData[newSensor.dataPoint];
+		const motion = value>newSensor.threshold ? true : false;
 
-    if(!motionSensor){
-      this.platform.log.info('Adding custom sensor for %s', device.info.name);
-      motionSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
-    } else{
-      this.platform.log.debug('update Accessory %s custom sensor', device.info.name);
-    }
+		if(!motionSensor){
+			this.platform.log.info('Adding custom sensor for %s', device.info.name);
+			motionSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+		} else{
+			this.platform.log.debug('update Accessory %s custom sensor', device.info.name);
+		}
 		motionSensor.getService(this.platform.Service.AccessoryInformation)!
 		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
@@ -48,14 +48,14 @@ export class motionSensor {
 		  .setCharacteristic(this.platform.Characteristic.MotionDetected, motion)
 		  .setCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel, value);
 		return motionSensor;
-  }
+	}
 
-  async getStatusMotion(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.MotionDetected).value;
-      return currentValue;
-    }
-  }
+	async getStatusMotion(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.MotionDetected).value;
+			return currentValue;
+		}
+	}
 }

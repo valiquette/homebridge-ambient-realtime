@@ -3,30 +3,30 @@ import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } 
 import type { ambientPlatform } from '../ambient_platform.js';
 
 export class leakSensor {
-  public readonly Service!: typeof Service;
-  public readonly Characteristic!: typeof Characteristic;
-  constructor(
+	public readonly Service!: typeof Service;
+	public readonly Characteristic!: typeof Characteristic;
+	constructor(
 		private readonly platform: ambientPlatform,
-  ){}
-  createAccessory(device: any, uuid: string, waterSensor: PlatformAccessory, name: any) {
-    let index: any = name.substring(name.length-1)*1;
-    if(!Number.isInteger(index)){
-      index = 'in';
-    }
-    let leak = device.lastData[`leak${index}`];
-    let active = true;
-    const batt = device.lastData[`batleak${index}`]; //1=OK, 0=Low
-    if(leak === 2){
-      active = false;
-      leak = 0;
-    }
+	){}
+	createAccessory(device: any, uuid: string, waterSensor: PlatformAccessory, name: any) {
+		let index: any = name.substring(name.length-1)*1;
+		if(!Number.isInteger(index)){
+			index = 'in';
+		}
+		let leak = device.lastData[`leak${index}`];
+		let active = true;
+		const batt = device.lastData[`batleak${index}`]; //1=OK, 0=Low
+		if(leak === 2){
+			active = false;
+			leak = 0;
+		}
 
-    if(!waterSensor){
-      this.platform.log.info('Adding leak sensor for %s', device.info.name);
-      waterSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
-    } else{
-      this.platform.log.debug('update Accessory %s leak sensor', device.info.name);
-    }
+		if(!waterSensor){
+			this.platform.log.info('Adding leak sensor for %s', device.info.name);
+			waterSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+		} else{
+			this.platform.log.debug('update Accessory %s leak sensor', device.info.name);
+		}
 		waterSensor.getService(this.platform.Service.AccessoryInformation)!
 		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
@@ -64,27 +64,27 @@ export class leakSensor {
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt);
 
 		return waterSensor;
-  }
+	}
 
-  async getStatusLeak(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.LeakDetected).value;
-      return currentValue;
-    }
-  }
+	async getStatusLeak(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.LeakDetected).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
-    let currentValue: any = 0;
-    try{
-      currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
-      if (currentValue === 1) {
-        this.platform.log.warn('Battery Status Low');
-      }
-    }catch (error) {
-      this.platform.log.error('caught low battery error');
-    }
-    return currentValue;
-  }
+	async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
+		let currentValue: any = 0;
+		try{
+			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
+			if (currentValue === 1) {
+				this.platform.log.warn('Battery Status Low');
+			}
+		}catch (error) {
+			this.platform.log.error('caught low battery error');
+		}
+		return currentValue;
+	}
 }

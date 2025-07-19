@@ -3,26 +3,26 @@ import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } 
 import type { ambientPlatform } from '../ambient_platform.js';
 
 export class tempSensor {
-  public readonly Service!: typeof Service;
-  public readonly Characteristic!: typeof Characteristic;
-  constructor(
+	public readonly Service!: typeof Service;
+	public readonly Characteristic!: typeof Characteristic;
+	constructor(
 		private readonly platform: ambientPlatform,
-  ){}
-  createAccessory(device: any, uuid: string, indoorSensor: PlatformAccessory, name: any) {
-    let index: any = name.substring(name.length-1)*1;
-    if(!Number.isInteger(index)){
-      index = 'in';
-    }
-    const temp = ((device.lastData[`temp${index}f`]- 32 + .01) * 5 / 9).toFixed(1);
-    const humdidity = device.lastData[`humidity${index}`];
-    const batt = !device.lastData[`batt${index}`];  //1=OK, 0=Low
+	){}
+	createAccessory(device: any, uuid: string, indoorSensor: PlatformAccessory, name: any) {
+		let index: any = name.substring(name.length-1)*1;
+		if(!Number.isInteger(index)){
+			index = 'in';
+		}
+		const temp = ((device.lastData[`temp${index}f`]- 32 + .01) * 5 / 9).toFixed(1);
+		const humdidity = device.lastData[`humidity${index}`];
+		const batt = !device.lastData[`batt${index}`];  //1=OK, 0=Low
 
-    if(!indoorSensor){
-      this.platform.log.info('Adding temp & humidity sensor for %s', device.info.name);
-      indoorSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
-    } else{
-      this.platform.log.debug('update Accessory %s temp & humidity sensor', device.info.name);
-    }
+		if(!indoorSensor){
+			this.platform.log.info('Adding temp & humidity sensor for %s', device.info.name);
+			indoorSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+		} else{
+			this.platform.log.debug('update Accessory %s temp & humidity sensor', device.info.name);
+		}
 		indoorSensor.getService(this.platform.Service.AccessoryInformation)!
 		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
@@ -83,36 +83,36 @@ export class tempSensor {
 		}
 
 		return indoorSensor;
-  }
+	}
 
-  async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
-      return currentValue;
-    }
-  }
+	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value;
-      return currentValue;
-    }
-  }
+	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
-    let currentValue: any = 0;
-    try{
-      currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
-      if (currentValue === 1) {
-        this.platform.log.warn('Battery Status Low');
-      }
-    }catch (error) {
-      this.platform.log.error('caught low battery error');
-    }
-    return currentValue;
-  }
+	async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
+		let currentValue: any = 0;
+		try{
+			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
+			if (currentValue === 1) {
+				this.platform.log.warn('Battery Status Low');
+			}
+		}catch (error) {
+			this.platform.log.error('caught low battery error');
+		}
+		return currentValue;
+	}
 }

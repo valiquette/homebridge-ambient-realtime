@@ -3,18 +3,18 @@ import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } 
 import type { ambientPlatform } from '../ambient_platform.js';
 
 export class aqinSensor {
-  public readonly Service!: typeof Service;
-  public readonly Characteristic!: typeof Characteristic;
-  constructor(
+	public readonly Service!: typeof Service;
+	public readonly Characteristic!: typeof Characteristic;
+	constructor(
 		private readonly platform: ambientPlatform,
-  ){}
-  createAccessory(device: any, uuid: string, aqinSensor: PlatformAccessory) {
-    if(!aqinSensor){
-      this.platform.log.info('Adding air quality sensor for %s', device.info.name);
-      aqinSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
-    } else{
-      this.platform.log.debug('update Accessory %s AQIN', device.info.name);
-    }
+	){}
+	createAccessory(device: any, uuid: string, aqinSensor: PlatformAccessory) {
+		if(!aqinSensor){
+			this.platform.log.info('Adding air quality sensor for %s', device.info.name);
+			aqinSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+		} else{
+			this.platform.log.debug('update Accessory %s AQIN', device.info.name);
+		}
 		aqinSensor.getService(this.platform.Service.AccessoryInformation)!
 		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
@@ -130,54 +130,54 @@ export class aqinSensor {
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_co2);
 
 		return aqinSensor;
-  }
+	}
 
-  async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
-      return currentValue;
-    }
-  }
+	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value;
-      return currentValue;
-    }
-  }
+	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusAir(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.AirQuality).value;
-      return currentValue;
-    }
-  }
+	async getStatusAir(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.AirQuality).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusCo2(sensorStatus: Service): Promise<CharacteristicValue> {
-    if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    } else {
-      const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CarbonDioxideDetected).value;
-      return currentValue;
-    }
-  }
+	async getStatusCo2(sensorStatus: Service): Promise<CharacteristicValue> {
+		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		} else {
+			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CarbonDioxideDetected).value;
+			return currentValue;
+		}
+	}
 
-  async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
-    let currentValue: any = 0;
-    try{
-      currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
-      if (currentValue === 1) {
-        this.platform.log.warn('Battery Status Low');
-      }
-    }catch (error) {
-      this.platform.log.error('caught low battery error');
-    }
-    return currentValue;
-  }
+	async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
+		let currentValue: any = 0;
+		try{
+			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
+			if (currentValue === 1) {
+				this.platform.log.warn('Battery Status Low');
+			}
+		}catch (error) {
+			this.platform.log.error('caught low battery error');
+		}
+		return currentValue;
+	}
 }
