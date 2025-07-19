@@ -1,5 +1,12 @@
 # Changes
 
+## 0.1.11
+update
+- fixed typo in readme
+- added verified badge
+- bumped dependencies
+- deprecated node 18 support
+
 ## 0.1.10
 update
 - fixed an issue with battery status

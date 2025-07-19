@@ -56,6 +56,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		this.locationAddress = config.locationAddress;
 		if (!config.api_key || !config.api_app_key) {
 			this.log.error('Valid API keys are required, please check the plugin config');
+			return;
 		}
 		this.log.info('Starting Ambient platform using homebridge API', api.version);
 
