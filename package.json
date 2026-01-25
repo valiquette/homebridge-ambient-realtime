@@ -1,16 +1,16 @@
 {
 	"name": "homebridge-ambient-realtime",
 	"displayName": "Ambient",
-	"version": "0.1.11",
+	"version": "0.1.12",
 	"type": "module",
 	"description": "Ambient Weather Realtime API platform plugin for [Homebridge](https://github.com/nfarina/homebridge).",
 	"main": "dist/index.js",
 	"dependencies": {
-		"socket.io-client": "^4.8.1"
+		"socket.io-client": "^4.8.3"
 	},
 	"engines": {
-		"homebridge": "^1.8.0 || ^1.9.0 || ^2.0.0-beta.0",
-		"node": "^20.19.0 || ^22.17.0 ||^24.4.0"
+		"homebridge": "^1.11.0 || ^2.0.0-beta.0",
+		"node": "^20.20.0 || ^22.22.0 ||^24.13.0"
 	},
 	"keywords": [
 		"homebridge-plugin",

@@ -2,6 +2,12 @@
 
 ## 0.1.11
 update
+-  addresses Homebridge charateristic warnings
+-  improved error handling
+-  bumped dependencies
+
+## 0.1.11
+update
 - fixed typo in readme
 - added verified badge
 - bumped dependencies
