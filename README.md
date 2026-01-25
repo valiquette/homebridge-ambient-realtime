@@ -46,7 +46,7 @@
             },
             {
                 "name": "Rain",
-                "dataPoint": "eventrainin",
+                "dataPoint": "hourlyrainin",
                 "threshold": 0,
                 "type": 0
             },

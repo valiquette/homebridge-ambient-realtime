@@ -150,236 +150,241 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		let index: any;
 		let accessory: PlatformAccessory;
 
-		devices.forEach((device: any) => {
-			if (this.locationAddress === device.info.coords.address.split(',')[0] || this.locationAddress == null) {
-				this.log.info('Found a match for configured location %s', device.info.coords.address.split(',')[0]);
+		try {
+			devices.forEach((device: any) => {
+				if (this.locationAddress === device.info.coords.address.split(',')[0] || this.locationAddress == null) {
+					this.log.info('Found a match for configured location %s', device.info.coords.address.split(',')[0]);
 
-				/*
-				//for testing
-				device.lastData.temp1f=69.0;
-				device.lastData.humidity1=20;
-				device.lastData.batt1=1;
-				device.lastData.leak1=0;
-				device.lastData.batleak1=0;
-				device.lastData.pm25=22;
-				device.lastData.batt_25=1;
-				device.lastData.pm25_in=80;
-				//for testing
-				*/
+					/*
+					//for testing
+					device.lastData.temp1f=69.0;
+					device.lastData.humidity1=20;
+					device.lastData.batt1=1;
+					device.lastData.leak1=0;
+					device.lastData.batleak1=0;
+					device.lastData.pm25=22;
+					device.lastData.batt_25=1;
+					device.lastData.pm25_in=80;
+					//for testing
+					*/
 
-				this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
-				if (this.showOutdoor && device.lastData.tempf) {
-					uuid = this.genUUID('station');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (!this.accessories[index]) {
-						this.log.debug('Registering platform accessory station');
-						accessory = new station(this).createAccessory(device, uuid, this.accessories[index]);
-						this.accessories.push(accessory);
-						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-					} else {
-						accessory = new station(this).createAccessory(device, uuid, this.accessories[index]);
-					}
-				} else {
-					uuid = this.genUUID('station');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (this.accessories[index]) {
-						this.log.debug('Removed cached device', device.id);
-						this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-						delete this.accessories[index];
-					}
-				}
-
-				if (this.showIndoor && device.lastData.tempinf) {
-					name = 'indoor';
-					uuid = this.genUUID(name);
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (!this.accessories[index]) {
-						this.log.debug('Registering platform accessory temp');
-						accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
-						this.accessories.push(accessory);
-						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-					} else {
-						accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
-					}
-				} else {
-					if (this.showIndoor) {
-						this.log.info('Skipping indoor, sensor not found');
-					}
-					uuid = this.genUUID('indoor');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (this.accessories[index]) {
-						this.log.debug('Removed cached device indoor', device.id);
-						this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-						delete this.accessories[index];
-					}
-				}
-
-				if (this.showAqin && device.lastData.co2_in_aqin) {
-					uuid = this.genUUID('aqin');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (!this.accessories[index]) {
-						this.log.debug('Registering platform accessory aqin');
-						accessory = new aqinSensor(this).createAccessory(device, uuid, this.accessories[index]);
-						this.accessories.push(accessory);
-						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-					} else {
-						accessory = new aqinSensor(this).createAccessory(device, uuid, this.accessories[index]);
-					}
-				} else {
-					if (this.showAqin) {
-						this.log.info('Skipping aqin, sensor not found');
-					}
-					uuid = this.genUUID('aqin');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (this.accessories[index]) {
-						this.log.debug('Removed cached device aqin', device.id);
-						this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-						delete this.accessories[index];
-					}
-				}
-
-				if (this.showAirIn && device.lastData.pm25_in) {
-					uuid = this.genUUID('air_in');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (!this.accessories[index]) {
-						this.log.debug('Registering platform accessory indoor air');
-						accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in');
-						this.accessories.push(accessory);
-						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-					} else {
-						accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in');
-					}
-				} else {
-					if (this.showAirIn) {
-						this.log.info('Skipping indoor air sensor not found');
-					}
-					uuid = this.genUUID('air_in');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (this.accessories[index]) {
-						this.log.debug('Removed cached device aqin', device.id);
-						this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-						delete this.accessories[index];
-					}
-				}
-				if (this.showAirOut && device.lastData.pm25) {
-					uuid = this.genUUID('air_out');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (!this.accessories[index]) {
-						this.log.debug('Registering platform accessory outdoor air');
-						accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out');
-						this.accessories.push(accessory);
-						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-					} else {
-						accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out');
-					}
-				} else {
-					if (this.showAirOut) {
-						this.log.info('Skipping outdoor air sensor not found');
-					}
-					uuid = this.genUUID('air_out');
-					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-					if (this.accessories[index]) {
-						this.log.debug('Removed cached device aqin', device.id);
-						this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-						delete this.accessories[index];
-					}
-				}
-
-				if (this.showOtherTemp) {
-					for (let n = 1; n <= this.maxTemp; n++) {
-						name = 'temp' + n;
-						uuid = this.genUUID(name);
-						if (device.lastData[`temp${n}f`]) {
-							if (!this.accessories[index]) {
-								this.log.debug('Registering platform accessory temp%s', index);
-								accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
-								this.accessories.push(accessory);
-								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-							} else {
-								accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
-							}
+					this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
+					if (this.showOutdoor && device.lastData.tempf) {
+						uuid = this.genUUID('station');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (!this.accessories[index]) {
+							this.log.debug('Registering platform accessory station');
+							accessory = new station(this).createAccessory(device, uuid, this.accessories[index]);
+							this.accessories.push(accessory);
+							this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 						} else {
-							this.log.debug('Skipping temp%s, sensor not found', n);
-							if (this.accessories[index]) {
-								this.log.debug('Removed cached device temp%s', n);
-								this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-								delete this.accessories[index];
-							}
+							accessory = new station(this).createAccessory(device, uuid, this.accessories[index]);
+						}
+					} else {
+						uuid = this.genUUID('station');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (this.accessories[index]) {
+							this.log.debug('Removed cached device', device.id);
+							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+							delete this.accessories[index];
 						}
 					}
-				}
 
-				if (this.showLeak) {
-					for (let n = 1; n <= this.maxLeak; n++) {
-						name = 'leak' + n;
+					if (this.showIndoor && device.lastData.tempinf) {
+						name = 'indoor';
 						uuid = this.genUUID(name);
 						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-						if (device.lastData[`leak${n}`] != null) {
-							if (!this.accessories[index]) {
-								this.log.debug('Registering platform accessory leak%s', n);
-								accessory = new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name);
-								this.accessories.push(accessory);
-								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-							} else {
-								accessory = new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name);
-							}
+						if (!this.accessories[index]) {
+							this.log.debug('Registering platform accessory temp');
+							accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+							this.accessories.push(accessory);
+							this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 						} else {
-							this.log.debug('Skipping leak%s, sensor not found', n);
-							if (this.accessories[index]) {
-								this.log.debug('Removed cached device leak%s', n);
-								this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-								delete this.accessories[index];
-							}
+							accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+						}
+					} else {
+						if (this.showIndoor) {
+							this.log.info('Skipping indoor, sensor not found');
+						}
+						uuid = this.genUUID('indoor');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (this.accessories[index]) {
+							this.log.debug('Removed cached device indoor', device.id);
+							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+							delete this.accessories[index];
 						}
 					}
-				}
 
-				if (Array.isArray(this.customSensor)) {
-					this.customSensor.forEach((sensor: any) => {
-						if (device.lastData[sensor.dataPoint] != null) {
-							uuid = this.genUUID(sensor.name);
-							index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-							if (this.accessories[index]) {
-								const checkType: any = this.accessories[index].getService(this.Service.AccessoryInformation)!
-									.getCharacteristic(this.Characteristic.ProductData);
-								if ((checkType.value === 'motion' && sensor.type === 1) || (checkType.value === 'occupancy' && sensor.type === 0)) {
-									this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit');
+					if (this.showAqin && device.lastData.co2_in_aqin) {
+						uuid = this.genUUID('aqin');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (!this.accessories[index]) {
+							this.log.debug('Registering platform accessory aqin');
+							accessory = new aqinSensor(this).createAccessory(device, uuid, this.accessories[index]);
+							this.accessories.push(accessory);
+							this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+						} else {
+							accessory = new aqinSensor(this).createAccessory(device, uuid, this.accessories[index]);
+						}
+					} else {
+						if (this.showAqin) {
+							this.log.info('Skipping aqin, sensor not found');
+						}
+						uuid = this.genUUID('aqin');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (this.accessories[index]) {
+							this.log.debug('Removed cached device aqin', device.id);
+							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+							delete this.accessories[index];
+						}
+					}
+
+					if (this.showAirIn && device.lastData.pm25_in) {
+						uuid = this.genUUID('air_in');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (!this.accessories[index]) {
+							this.log.debug('Registering platform accessory indoor air');
+							accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in');
+							this.accessories.push(accessory);
+							this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+						} else {
+							accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in');
+						}
+					} else {
+						if (this.showAirIn) {
+							this.log.info('Skipping indoor air sensor not found');
+						}
+						uuid = this.genUUID('air_in');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (this.accessories[index]) {
+							this.log.debug('Removed cached device aqin', device.id);
+							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+							delete this.accessories[index];
+						}
+					}
+					if (this.showAirOut && device.lastData.pm25) {
+						uuid = this.genUUID('air_out');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (!this.accessories[index]) {
+							this.log.debug('Registering platform accessory outdoor air');
+							accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out');
+							this.accessories.push(accessory);
+							this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+						} else {
+							accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out');
+						}
+					} else {
+						if (this.showAirOut) {
+							this.log.info('Skipping outdoor air sensor not found');
+						}
+						uuid = this.genUUID('air_out');
+						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+						if (this.accessories[index]) {
+							this.log.debug('Removed cached device aqin', device.id);
+							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+							delete this.accessories[index];
+						}
+					}
+
+					if (this.showOtherTemp) {
+						for (let n = 1; n <= this.maxTemp; n++) {
+							name = 'temp' + n;
+							uuid = this.genUUID(name);
+							if (device.lastData[`temp${n}f`]) {
+								if (!this.accessories[index]) {
+									this.log.debug('Registering platform accessory temp%s', index);
+									accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+									this.accessories.push(accessory);
+									this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+								} else {
+									accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+								}
+							} else {
+								this.log.debug('Skipping temp%s, sensor not found', n);
+								if (this.accessories[index]) {
+									this.log.debug('Removed cached device temp%s', n);
 									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
 									delete this.accessories[index];
 								}
 							}
-							if (!this.accessories[index]) {
-								this.log.debug('Registering platform accessory');
-								switch (sensor.type) {
-								case 0: accessory = new motionSensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
-								case 1: accessory = new occupancySensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
-								}
-								this.accessories.push(accessory);
-								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-							} else {
-								switch (sensor.type) {
-								case 0: accessory = new motionSensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
-								case 1: accessory = new occupancySensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
-								}
-							}
-						} else {
-							this.log.info('Skipping sensor not found');
-							uuid = this.genUUID(sensor.name);
+						}
+					}
+
+					if (this.showLeak) {
+						for (let n = 1; n <= this.maxLeak; n++) {
+							name = 'leak' + n;
+							uuid = this.genUUID(name);
 							index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-							if (this.accessories[index]) {
-								this.log.debug('Removed cached device', device.id);
-								this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-								delete this.accessories[index];
+							if (device.lastData[`leak${n}`] != null) {
+								if (!this.accessories[index]) {
+									this.log.debug('Registering platform accessory leak%s', n);
+									accessory = new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+									this.accessories.push(accessory);
+									this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+								} else {
+									accessory = new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+								}
+							} else {
+								this.log.debug('Skipping leak%s, sensor not found', n);
+								if (this.accessories[index]) {
+									this.log.debug('Removed cached device leak%s', n);
+									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+									delete this.accessories[index];
+								}
 							}
 						}
-					});
+					}
+
+					if (Array.isArray(this.customSensor)) {
+						this.customSensor.forEach((sensor: any) => {
+							if (device.lastData[sensor.dataPoint] != null) {
+								uuid = this.genUUID(sensor.name);
+								index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+								if (this.accessories[index]) {
+									const checkType: any = this.accessories[index].getService(this.Service.AccessoryInformation)!
+										.getCharacteristic(this.Characteristic.ProductData);
+									if ((checkType.value === 'motion' && sensor.type === 1) || (checkType.value === 'occupancy' && sensor.type === 0)) {
+										this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit');
+										this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+										delete this.accessories[index];
+									}
+								}
+								if (!this.accessories[index]) {
+									this.log.debug('Registering platform accessory');
+									switch (sensor.type) {
+									case 0: accessory = new motionSensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
+									case 1: accessory = new occupancySensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
+									}
+									this.accessories.push(accessory);
+									this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+								} else {
+									switch (sensor.type) {
+									case 0: accessory = new motionSensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
+									case 1: accessory = new occupancySensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
+									}
+								}
+							} else {
+								this.log.info('Skipping sensor not found');
+								uuid = this.genUUID(sensor.name);
+								index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+								if (this.accessories[index]) {
+									this.log.debug('Removed cached device', device.id);
+									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
+									delete this.accessories[index];
+								}
+							}
+						});
+					}
+				} else {
+					this.log.info('Skipping location %s does not match configured location %s', device.info.coords.address.split(',')[0], this.locationAddress);
 				}
-			} else {
-				this.log.info('Skipping location %s does not match configured location %s', device.info.coords.address.split(',')[0], this.locationAddress);
-			}
-			this.updateStatus(device.lastData);
-		});
+				this.updateStatus(device.lastData);
+			});
+		} catch (err: any) {
+			this.log.error('Error updating status %s', err.message || err);
+		}
 	}
+
 	updateStatus(data: any) {
 		let tempSensor: Service;
 		let humditySensor: Service;
@@ -601,8 +606,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					}
 				});
 			}
-		} catch (err) {
-			this.log.error('Error updating status %s', err);
+		} catch (err: any) {
+			this.log.error('Error adding sensors %s', err.message || err);
 		}
 	}
 
