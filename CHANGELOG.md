@@ -1,15 +1,20 @@
 # Changes
 
+## 0.1.14
+update
+-  code cleanup
+-  addressed Homebridge charateristic warnings
+
 ## 0.1.13
 update
 -  improved accessory naming
 -  improved error messaging
--  addresses Homebridge charateristic warnings
+-  addressed Homebridge charateristic warnings
 -  bumped dependencies
 
 ## 0.1.12
 update
--  addresses Homebridge charateristic warnings
+-  addressed Homebridge charateristic warnings
 -  improved error handling
 -  bumped dependencies
 

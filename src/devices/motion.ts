@@ -14,12 +14,12 @@ export class motionSensor {
 
 		if(!motionSensor){
 			this.platform.log.info('Adding custom sensor %s for %s', newSensor.name, device.info.name);
-			motionSensor = new this.platform.api.platformAccessory(device.info.name+' '+newSensor.name, uuid);
+			motionSensor = new this.platform.api.platformAccessory(`${device.info.name} ${newSensor.name}`, uuid);
 		} else{
 			this.platform.log.debug('Update %s custom sensor %s for %s', device.info.name, newSensor.name, newSensor.dataPoint );
 		}
 		motionSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+newSensor.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WS')
@@ -31,7 +31,7 @@ export class motionSensor {
 		  motionSensor.addService(sensor);
 		  sensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
 		  sensor.addCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
-		  sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+newSensor.name);
+		  sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${newSensor.name}`);
 		  sensor
 		    .getCharacteristic(this.platform.Characteristic.MotionDetected)
 		    .onGet(this.getStatusMotion.bind(this, sensor));
@@ -43,7 +43,7 @@ export class motionSensor {
 		    maxValue: 10000,
 		  });
 		sensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+newSensor.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.MotionDetected, motion)
 		  .setCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel, value);

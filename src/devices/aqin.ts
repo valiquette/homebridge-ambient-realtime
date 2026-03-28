@@ -12,12 +12,12 @@ export class aqinSensor {
 		const name ='Indoor Air Quality';
 		if(!aqinSensor){
 			this.platform.log.info('Adding air quality sensor for %s', device.info.name);
-			aqinSensor = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
+			aqinSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.platform.log.debug('Update %s AQIN', device.info.name+' '+name);
+			this.platform.log.debug('Update %s AQIN', `${device.info.name} ${name}`);
 		}
 		aqinSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WS45');
@@ -27,13 +27,13 @@ export class aqinSensor {
 		  tempSensor = new this.platform.Service.TemperatureSensor(name);
 		  aqinSensor.addService(tempSensor);
 		  tempSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  tempSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+name);
+		  tempSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  tempSensor
 		    .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
 		    .onGet(this.getStatusTemp.bind(this, tempSensor));
 		}
 		tempSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, ((device.lastData.pm_in_temp_aqin- 32 + .01) * 5 / 9).toFixed(1));
@@ -43,14 +43,14 @@ export class aqinSensor {
 		  humSensor = new this.platform.Service.HumiditySensor(name);
 		  aqinSensor.addService(humSensor);
 		  humSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  humSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+name);
+		  humSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  humSensor
 		    .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
 		    .onGet(this.getStatusHum.bind(this, humSensor));
 		}
 
 		humSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, device.lastData.pm_in_humidity_aqin);
@@ -60,7 +60,7 @@ export class aqinSensor {
 		  airSensor = new this.platform.Service.AirQualitySensor(name);
 		  aqinSensor.addService(airSensor);
 		  airSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  airSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+name);
+		  airSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  airSensor
 		    .getCharacteristic(this.platform.Characteristic.AirQuality)
 		    .onGet(this.getStatusAir.bind(this, airSensor));
@@ -82,7 +82,7 @@ export class aqinSensor {
 		}
 
 		airSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.AirQuality, aqi)
@@ -95,7 +95,7 @@ export class aqinSensor {
 		  co2Sensor = new this.platform.Service.CarbonDioxideSensor(name);
 		  aqinSensor.addService(co2Sensor);
 		  co2Sensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  co2Sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+name);
+		  co2Sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  co2Sensor
 		    .getCharacteristic(this.platform.Characteristic.CarbonDioxideDetected)
 		    .onGet(this.getStatusCo2.bind(this, co2Sensor));
@@ -109,7 +109,7 @@ export class aqinSensor {
 		}
 
 		co2Sensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW)
 		  .setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, co2)
@@ -126,7 +126,7 @@ export class aqinSensor {
 		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 		}
 		batteryStatus
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_co2);
 
 		return aqinSensor;

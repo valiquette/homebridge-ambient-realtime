@@ -14,12 +14,12 @@ export class occupancySensor {
 
 		if(!occupancySensor){
 			this.platform.log.info('Adding custom sensor %s for %s', newSensor.name, device.info.name);
-			occupancySensor = new this.platform.api.platformAccessory(device.info.name+' '+newSensor.name, uuid);
+			occupancySensor = new this.platform.api.platformAccessory(`${device.info.name} ${newSensor.name}`, uuid);
 		} else{
 			this.platform.log.debug('Update %s custom sensor %s for %s', device.info.name, newSensor.name, newSensor.dataPoint );
 		}
 		occupancySensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+newSensor.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WS')
@@ -31,7 +31,7 @@ export class occupancySensor {
 		  occupancySensor.addService(sensor);
 		  sensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
 		  sensor.addCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
-		  sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+newSensor.name);
+		  sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${newSensor.name}`);
 		  sensor
 		    .getCharacteristic(this.platform.Characteristic.OccupancyDetected)
 		    .onGet(this.getStatusoccupancy.bind(this, sensor));
@@ -43,7 +43,7 @@ export class occupancySensor {
 		    maxValue: 10000,
 		  });
 		sensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+newSensor.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.OccupancyDetected, occupancy)
 		  .setCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel, value);
