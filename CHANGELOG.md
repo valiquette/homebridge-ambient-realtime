@@ -1,6 +1,13 @@
 # Changes
 
-## 0.1.11
+## 0.1.13
+update
+-  improved accessory naming
+-  improved error messaging
+-  addresses Homebridge charateristic warnings
+-  bumped dependencies
+
+## 0.1.12
 update
 -  addresses Homebridge charateristic warnings
 -  improved error handling

@@ -19,12 +19,12 @@ export class tempSensor {
 
 		if(!indoorSensor){
 			this.platform.log.info('Adding temp & humidity sensor for %s', device.info.name);
-			indoorSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+			indoorSensor = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
 		} else{
-			this.platform.log.debug('update Accessory %s temp & humidity sensor', device.info.name);
+			this.platform.log.debug('Update %s temp & humidity sensor', device.info.name+' '+name);
 		}
 		indoorSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WH32');

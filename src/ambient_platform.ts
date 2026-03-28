@@ -124,7 +124,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		socket.on('data', (data) => {
 			//this.log.debug('data',JSON.stringify(data,null,2))
 			if (this.showSocketData) {
-				this.log.debug('data recieved %s current outdoor temp %s ', data.date, data.tempf);
+				this.log.debug('data recieved %s current outdoor temp %s°F', data.date, data.tempf);
 			}
 
 			/*
@@ -336,7 +336,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					}
 
 					if (Array.isArray(this.customSensor)) {
-						this.customSensor.forEach((sensor: any) => {
+						this.customSensor.forEach((sensor: any, idx: any) => {
 							if (device.lastData[sensor.dataPoint] != null) {
 								uuid = this.genUUID(sensor.name);
 								index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -364,9 +364,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 									}
 								}
 							} else {
-								this.log.info('Skipping sensor not found');
+								this.log.info('Skipping sensor %s not found',sensor.name );
 								uuid = this.genUUID(sensor.name);
 								index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+								this.customSensor.splice(idx,1) //remove from custom array
 								if (this.accessories[index]) {
 									this.log.debug('Removed cached device', device.id);
 									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
@@ -381,7 +382,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 				this.updateStatus(device.lastData);
 			});
 		} catch (err: any) {
-			this.log.error('Error updating status %s', err.message || err);
+			//this.log.error('Error updating intial status %s sensor: %s',this.accessories[index].displayName, err.message || err);
+			this.log.error('Error updating intial status %s sensor: %s','unknown', err.message || err);
 		}
 	}
 
@@ -523,6 +525,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_co2);
 				}
 			}
+
 			if (this.showAirIn && data.pm25_in) {
 				uuid = this.genUUID('air_in');
 				index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -587,7 +590,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					uuid = this.genUUID(device.name);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 					if (this.accessories[index]) {
-						const value = data[device.dataPoint];
+						const value = data[device.dataPoint] || 0;
 						const motion = value > device.threshold ? true : false;
 						let sensor;
 						this.weatherStation = this.accessories[index];
@@ -606,8 +609,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					}
 				});
 			}
+
 		} catch (err: any) {
-			this.log.error('Error adding sensors %s', err.message || err);
+			//this.log.error('Error updating %s sensor: %s',this.accessories[index].displayName, err.message || err);
+			this.log.error('Error updating %s sensor: %s','unknown', err.message || err);
 		}
 	}
 

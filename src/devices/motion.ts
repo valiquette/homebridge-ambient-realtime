@@ -13,13 +13,13 @@ export class motionSensor {
 		const motion = value>newSensor.threshold ? true : false;
 
 		if(!motionSensor){
-			this.platform.log.info('Adding custom sensor for %s', device.info.name);
-			motionSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+			this.platform.log.info('Adding custom sensor %s for %s', newSensor.name, device.info.name);
+			motionSensor = new this.platform.api.platformAccessory(device.info.name+' '+newSensor.name, uuid);
 		} else{
-			this.platform.log.debug('update Accessory %s custom sensor', device.info.name);
+			this.platform.log.debug('Update %s custom sensor %s for %s', device.info.name, newSensor.name, newSensor.dataPoint );
 		}
 		motionSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+newSensor.name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WS')

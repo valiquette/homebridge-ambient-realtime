@@ -20,12 +20,12 @@ export class airSensor {
 		}
 		if(!airSensorX){
 			this.platform.log.info('Adding air quality sensor for %s', device.info.name);
-			airSensorX = new this.platform.api.platformAccessory(device.info.name, uuid);
+			airSensorX = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
 		} else{
-			this.platform.log.debug('update Accessory %s AQIN', device.info.name);
+			this.platform.log.debug('Update %s AQIN', device.info.name+' '+name);
 		}
 		airSensorX.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WS45');
