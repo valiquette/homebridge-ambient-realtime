@@ -18,13 +18,13 @@ export class tempSensor {
 		const batt = !device.lastData[`batt${index}`];  //1=OK, 0=Low
 
 		if(!indoorSensor){
-			this.platform.log.info('Adding temp & humidity sensor for %s', device.info.name);
-			indoorSensor = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
+			this.platform.log.info('Adding Temp & Humidity sensor for %s', device.info.name);
+			indoorSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.platform.log.debug('Update %s temp & humidity sensor', device.info.name+' '+name);
+			this.platform.log.debug('Update %s Temp & Humidity sensor', `${device.info.name} ${name}`);
 		}
 		indoorSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WH32');
@@ -34,13 +34,13 @@ export class tempSensor {
 		  tempSensor = new this.platform.Service.TemperatureSensor(name);
 		  indoorSensor.addService(tempSensor);
 		  tempSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  tempSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+name);
+		  tempSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  tempSensor
 		    .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
 		    .onGet(this.getStatusTemp.bind(this, tempSensor));
 		}
 		tempSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, temp);
@@ -50,14 +50,14 @@ export class tempSensor {
 		  humSensor = new this.platform.Service.HumiditySensor(name);
 		  indoorSensor.addService(humSensor);
 		  humSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  humSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, device.info.name+' '+name);
+		  humSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  humSensor
 		    .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
 		    .onGet(this.getStatusHum.bind(this, humSensor));
 		}
 
 		humSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, humdidity);
@@ -73,7 +73,7 @@ export class tempSensor {
 		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 		  }
 		  batteryStatus
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt);
 
 		} else {

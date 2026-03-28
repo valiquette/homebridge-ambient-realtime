@@ -435,7 +435,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 			}
 
 			for (let n: number = 1; n <= this.maxTemp; n++) {
-				if (data[`temp${n}f`] != null) {
+				//if (data[`temp${n}f`] != null) {
+				if (Number.isFinite(data[`temp${n}`])){
 					uuid = this.genUUID('temp' + n);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 					if (this.accessories[index]) {
@@ -453,7 +454,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 			}
 
 			for (let n: number = 1; n <= this.maxLeak; n++) {
-				if (data[`leak${n}`] != null) {
+				//if (data[`leak${n}`] != null) {
+				if (Number.isFinite(data[`leak${n}`])) {
 					uuid = this.genUUID('leak' + n);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 					if (this.accessories[index]) {
@@ -475,18 +477,18 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 				}
 			}
 
-			if (this.showAqin && data.co2_in_aqin) {
+			if (this.showAqin && data.pm_in_temp_aqin) {
 				uuid = this.genUUID('aqin');
 				index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 				if (this.accessories[index]) {
 					this.weatherStation = this.accessories[index];
 					tempSensor = this.weatherStation.getService(this.Service.TemperatureSensor);
 					tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
-					tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.tempinf - 32 + .01) * 5 / 9).toFixed(1));
+					tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.pm_in_temp_aqin - 32 + .01) * 5 / 9).toFixed(1));
 
 					humditySensor = this.weatherStation.getService(this.Service.HumiditySensor);
 					humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
-					humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
+					humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.pm_in_humidity_aqin);
 
 					airSensor = this.weatherStation.getService(this.Service.AirQualitySensor);
 					airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
@@ -551,8 +553,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.UNKNOWN);
 					}
 
-					//batteryStatus=this.weatherStation.getService(this.Service.Battery)
-					//batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in)//check for batt
+					batteryStatus=this.weatherStation.getService(this.Service.Battery)
+					if(batteryStatus){
+						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in)
+					}
 				}
 			}
 			if (this.showAirOut && data.pm25) {
@@ -590,21 +594,26 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					uuid = this.genUUID(device.name);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 					if (this.accessories[index]) {
-						const value = data[device.dataPoint] || 0;
-						const motion = value > device.threshold ? true : false;
-						let sensor;
-						this.weatherStation = this.accessories[index];
-						switch (device.type) {
-						case 0:
-							sensor = this.weatherStation.getService(this.Service.MotionSensor);
-							sensor.getCharacteristic(this.Characteristic.MotionDetected).updateValue(motion);
-							sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
-							break;
-						case 1:
-							sensor = this.weatherStation.getService(this.Service.OccupancySensor);
-							sensor.getCharacteristic(this.Characteristic.OccupancyDetected).updateValue(motion);
-							sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
-							break;
+						if (Number.isFinite(data[device.dataPoint])){
+							const value = data[device.dataPoint];
+							const motion = value > device.threshold ? true : false;
+							let sensor;
+							this.weatherStation = this.accessories[index];
+							switch (device.type) {
+							case 0:
+								sensor = this.weatherStation.getService(this.Service.MotionSensor);
+								sensor.getCharacteristic(this.Characteristic.MotionDetected).updateValue(motion);
+								sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
+								break;
+							case 1:
+								sensor = this.weatherStation.getService(this.Service.OccupancySensor);
+								sensor.getCharacteristic(this.Characteristic.OccupancyDetected).updateValue(motion);
+								sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
+								break;
+							}
+						}
+						else{
+							this.log.debug('failed to update custome sensor, bad value')
 						}
 					}
 				});
