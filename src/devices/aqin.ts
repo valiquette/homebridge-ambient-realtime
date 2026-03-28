@@ -9,19 +9,19 @@ export class aqinSensor {
 		private readonly platform: ambientPlatform,
 	){}
 	createAccessory(device: any, uuid: string, aqinSensor: PlatformAccessory) {
+		const name ='Indoor Air Quality';
 		if(!aqinSensor){
 			this.platform.log.info('Adding air quality sensor for %s', device.info.name);
-			aqinSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+			aqinSensor = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
 		} else{
-			this.platform.log.debug('update Accessory %s AQIN', device.info.name);
+			this.platform.log.debug('Update %s AQIN', device.info.name+' '+name);
 		}
 		aqinSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WS45');
 
-		const name ='Indoor Air Quality';
 		let tempSensor=aqinSensor.getService(this.platform.Service.TemperatureSensor);
 		if(!tempSensor){
 		  tempSensor = new this.platform.Service.TemperatureSensor(name);

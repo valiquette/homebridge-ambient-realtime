@@ -23,12 +23,12 @@ export class leakSensor {
 
 		if(!waterSensor){
 			this.platform.log.info('Adding leak sensor for %s', device.info.name);
-			waterSensor = new this.platform.api.platformAccessory(device.info.name, uuid);
+			waterSensor = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
 		} else{
-			this.platform.log.debug('update Accessory %s leak sensor', device.info.name);
+			this.platform.log.debug('Update %s leak sensor', device.info.name+' '+name);
 		}
 		waterSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
+		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WH31LA');

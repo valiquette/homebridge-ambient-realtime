@@ -9,19 +9,19 @@ export class station {
 		private readonly platform: ambientPlatform,
 	){}
 	createAccessory(device: any, uuid: string, weatherStation: PlatformAccessory) {
+		const name = 'Outdoor';
 		 if(!weatherStation){
 			this.platform.log.info('Adding Outdoor sensors for %s', device.info.name);
-			weatherStation = new this.platform.api.platformAccessory(device.info.name, uuid);
+			weatherStation = new this.platform.api.platformAccessory(device.info.name+' '+name, uuid);
 		} else{
-			this.platform.log.debug('update Accessory %s outdoor station', device.info.name);
+			this.platform.log.debug('Update %s outdoor station', device.info.name+' '+name);
 		}
 			weatherStation.getService(this.platform.Service.AccessoryInformation)!
-			  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
+			  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
 			  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 			  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 			  .setCharacteristic(this.platform.Characteristic.Model, this.platform.config.station ? this.platform.config.station : 'WS4000');
 
-			const name = 'Outdoor';
 			let tempSensor = weatherStation.getService(this.platform.Service.TemperatureSensor);
 			if(!tempSensor){
 			  tempSensor = new this.platform.Service.TemperatureSensor(name);
