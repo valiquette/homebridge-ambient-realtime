@@ -367,7 +367,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 								this.log.info('Skipping sensor %s not found',sensor.name );
 								uuid = this.genUUID(sensor.name);
 								index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-								this.customSensor.splice(idx,1) //remove from custom array
+								this.customSensor.splice(idx,1); //remove from custom array
 								if (this.accessories[index]) {
 									this.log.debug('Removed cached device', device.id);
 									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
