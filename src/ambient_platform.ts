@@ -553,12 +553,13 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.UNKNOWN);
 					}
 
-					batteryStatus=this.weatherStation.getService(this.Service.Battery)
+					batteryStatus=this.weatherStation.getService(this.Service.Battery);
 					if(batteryStatus){
-						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in)
+						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in);
 					}
 				}
 			}
+
 			if (this.showAirOut && data.pm25) {
 				uuid = this.genUUID('air_out');
 				index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -594,7 +595,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					uuid = this.genUUID(device.name);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 					if (this.accessories[index]) {
-						if (Number.isFinite(data[device.dataPoint])){
+						if (Number.isFinite(data[device.dataPoint])) {
 							const value = data[device.dataPoint];
 							const motion = value > device.threshold ? true : false;
 							let sensor;
@@ -611,9 +612,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 								sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
 								break;
 							}
-						}
-						else{
-							this.log.debug('failed to update custome sensor, bad value')
+						} else {
+							this.log.debug('failed to update custom sensor, bad value');
 						}
 					}
 				});
