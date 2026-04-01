@@ -101,7 +101,7 @@ export class station {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.platform.log.warn('Battery Status Low');
+				this.platform.log.warn('Station Battery Status Low');
 			}
 		}catch (error) {
 			this.platform.log.error('caught low battery error');

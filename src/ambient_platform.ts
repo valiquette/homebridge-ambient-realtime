@@ -4,6 +4,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import { station } from './devices/station.js';
 import { tempSensor } from './devices/temp.js';
+import { poolSensor } from './devices/pool.js';
 import { aqinSensor } from './devices/aqin.js';
 import { airSensor } from './devices/air.js';
 import { leakSensor } from './devices/leak.js';
@@ -122,22 +123,29 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		});
 
 		socket.on('data', (data) => {
-			//this.log.debug('data',JSON.stringify(data,null,2))
+			//this.log.debug('data',JSON.stringify(data,null,2));
 			if (this.showSocketData) {
 				this.log.debug('data recieved %s current outdoor temp %s°F', data.date, data.tempf);
 			}
 
 			/*
 			//for testing
-			data.temp1f=96.0;
-			data.batt1=1; //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
-			data.humidity1=30;
 			data.leak1=2;
 			data.batleak1=0; //batleak1...batleak4 - Leak Detector Battery - 1=Low 0=OK
 			data.pm25=50;
 			data.batt_25=1;
 			data.pm25_in=100;
 			//for testing
+			*/
+			/*
+			data.temp1f=Math.random()* (Math.floor(90) - Math.ceil(60)) + Math.ceil(60);
+			//data.humidity1=Math.random()* (Math.floor(45) - Math.ceil(30)) + Math.ceil(30);
+			data.batt1=Math.random(); //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
+			data.temp2f=Math.random()* (Math.floor(90) - Math.ceil(60)) + Math.ceil(60);
+			data.humidity2=Math.random()* (Math.floor(45) - Math.ceil(30)) + Math.ceil(30);
+			data.batt2=Math.random(); //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
+			this.log.info(data.temp1f, data.batt1);
+			this.log.info(data.temp2f, data.humidity2, data.batt2);
 			*/
 
 			this.updateStatus(data);
@@ -157,15 +165,20 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 
 					/*
 					//for testing
-					device.lastData.temp1f=69.0;
-					device.lastData.humidity1=20;
-					device.lastData.batt1=1;
 					device.lastData.leak1=0;
 					device.lastData.batleak1=0;
 					device.lastData.pm25=22;
 					device.lastData.batt_25=1;
 					device.lastData.pm25_in=80;
 					//for testing
+					*/
+					/*
+					device.lastData.temp1f=69.0;
+					//device.lastData.humidity1=20;
+					device.lastData.batt1=1;
+					device.lastData.temp2f=69.0;
+					device.lastData.humidity2=20;
+					device.lastData.batt2=1;
 					*/
 
 					this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
@@ -290,7 +303,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						for (let n = 1; n <= this.maxTemp; n++) {
 							name = 'temp' + n;
 							uuid = this.genUUID(name);
-							if (device.lastData[`temp${n}f`]) {
+							index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
+							if (device.lastData[`temp${n}f`] && device.lastData[`humidity${n}`]) {
 								if (!this.accessories[index]) {
 									this.log.debug('Registering platform accessory temp%s', index);
 									accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
@@ -298,6 +312,15 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 									this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 								} else {
 									accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+								}
+							} else if (device.lastData[`temp${n}f`] && !device.lastData[`humidity${n}`]) {
+								if (!this.accessories[index]) {
+									this.log.debug('Registering platform accessory temp%s', index);
+									accessory = new poolSensor(this).createAccessory(device, uuid, this.accessories[index], name);
+									this.accessories.push(accessory);
+									this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+								} else {
+									accessory = new poolSensor(this).createAccessory(device, uuid, this.accessories[index], name);
 								}
 							} else {
 								this.log.debug('Skipping temp%s, sensor not found', n);
@@ -384,6 +407,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		} catch (err: any) {
 			//this.log.error('Error updating intial status %s sensor: %s',this.accessories[index].displayName, err.message || err);
 			this.log.error('Error updating intial status %s sensor: %s','unknown', err.message || err);
+			this.log.debug('Error updating intial status %s sensor: %s','unknown', err);
 		}
 	}
 
@@ -420,23 +444,24 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 				uuid = this.genUUID('indoor');
 				index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 				if (this.accessories[index]) {
-					this.weatherStation = this.accessories[index];
-					tempSensor = this.weatherStation.getService(this.Service.TemperatureSensor);
-					tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
-					tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.tempinf - 32 + .01) * 5 / 9).toFixed(1));
-					humditySensor = this.weatherStation.getService(this.Service.HumiditySensor);
-					humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
-					humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
-					batteryStatus = this.weatherStation.getService(this.Service.Battery);
-					if (batteryStatus) {
-						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battin);
+					if (Number.isFinite(data.tempinf) && Number.isFinite(data.humidityin)){
+						this.weatherStation = this.accessories[index];
+						tempSensor = this.weatherStation.getService(this.Service.TemperatureSensor);
+						tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+						tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.tempinf - 32 + .01) * 5 / 9).toFixed(1));
+						humditySensor = this.weatherStation.getService(this.Service.HumiditySensor);
+						humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+						humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
+						batteryStatus = this.weatherStation.getService(this.Service.Battery);
+						if (batteryStatus) {
+							batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battin);
+						}
 					}
 				}
 			}
 
 			for (let n: number = 1; n <= this.maxTemp; n++) {
-				//if (data[`temp${n}f`] != null) {
-				if (Number.isFinite(data[`temp${n}`])){
+				if (Number.isFinite(data[`temp${n}f`])){
 					uuid = this.genUUID('temp' + n);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
 					if (this.accessories[index]) {
@@ -444,9 +469,11 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						tempSensor = this.weatherStation.getService(this.Service.TemperatureSensor);
 						tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
 						tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data[`temp${n}f`] - 32 + .01) * 5 / 9).toFixed(1));
-						humditySensor = this.weatherStation.getService(this.Service.HumiditySensor);
-						humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
-						humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data[`humidity${n}`]);
+						if (Number.isFinite(data[`humidity${n}f`])){
+							humditySensor = this.weatherStation.getService(this.Service.HumiditySensor);
+							humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+							humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data[`humidity${n}`]);
+						}
 						batteryStatus = this.weatherStation.getService(this.Service.Battery);
 						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data[`batt${n}`]);
 					}
@@ -454,7 +481,6 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 			}
 
 			for (let n: number = 1; n <= this.maxLeak; n++) {
-				//if (data[`leak${n}`] != null) {
 				if (Number.isFinite(data[`leak${n}`])) {
 					uuid = this.genUUID('leak' + n);
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -622,6 +648,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		} catch (err: any) {
 			//this.log.error('Error updating %s sensor: %s',this.accessories[index].displayName, err.message || err);
 			this.log.error('Error updating %s sensor: %s','unknown', err.message || err);
+			this.log.debug('Error updating %s sensor: %s','unknown', err);
 		}
 	}
 
@@ -662,8 +689,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					this.weatherStation = this.accessories[index];
 					tempSensor = this.weatherStation.getService(this.Service.TemperatureSensor);
 					tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
-					humditySensor = this.indoor.getService(this.Service.HumiditySensor);
-					humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+					humditySensor = this.weatherStation.getService(this.Service.HumiditySensor);
+					if(humditySensor){
+						humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+					}
 				}
 			}
 

@@ -22,7 +22,7 @@ export class leakSensor {
 		}
 
 		if(!waterSensor){
-			this.platform.log.info('Adding leak sensor for %s', device.info.name);
+			this.platform.log.info('Adding leak sensor %s for %s', name, device.info.name);
 			waterSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
 			this.platform.log.debug('Update %s leak sensor', `${device.info.name} ${name}`);
@@ -57,7 +57,7 @@ export class leakSensor {
 
 		  batteryStatus
 		    .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
-		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
+		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 		}
 		batteryStatus
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
@@ -75,12 +75,12 @@ export class leakSensor {
 		}
 	}
 
-	async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
+	async getStatusLowBattery(batteryStatus: Service, name: any): Promise<CharacteristicValue> {
 		let currentValue: any = 0;
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.platform.log.warn('Battery Status Low');
+				this.platform.log.warn('Leak Detector %s Battery Status Low', name);
 			}
 		}catch (error) {
 			this.platform.log.error('caught low battery error');
