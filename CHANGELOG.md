@@ -1,5 +1,11 @@
 # Changes
 
+## 0.1.15
+update
+-  improved logging for battery warnings
+-  fixed bug, when trying to add a tempature only device
+-  added support for WH31P sensor
+
 ## 0.1.14
 update
 -  code cleanup

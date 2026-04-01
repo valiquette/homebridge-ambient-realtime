@@ -1,7 +1,7 @@
 {
 	"name": "homebridge-ambient-realtime",
 	"displayName": "Ambient",
-	"version": "0.1.14",
+	"version": "0.1.15",
 	"type": "module",
 	"description": "Ambient Weather Realtime API platform plugin for [Homebridge](https://github.com/nfarina/homebridge).",
 	"author": "John Valiquette",
