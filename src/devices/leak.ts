@@ -15,7 +15,7 @@ export class leakSensor {
 		}
 		let leak = device.lastData[`leak${index}`];
 		let active = true;
-		const batt = device.lastData[`batleak${index}`]; //1=OK, 0=Low
+		const batt = Number(device.lastData[`batleak${index}`]); //1=OK, 0=Low
 		if(leak === 2){
 			active = false;
 			leak = 0;
@@ -33,7 +33,7 @@ export class leakSensor {
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WH31LA');
 
-		let leakSensor=waterSensor.getService(this.platform.Service.TemperatureSensor);
+		let leakSensor = waterSensor.getService(this.platform.Service.LeakSensor);
 		if(!leakSensor){
 		  leakSensor = new this.platform.Service.LeakSensor(name);
 		  waterSensor.addService(leakSensor);
@@ -47,10 +47,9 @@ export class leakSensor {
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusActive, active)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.LeakDetected, leak);
 
-		let batteryStatus=waterSensor.getService(this.platform.Service.Battery);
+		let batteryStatus = waterSensor.getService(this.platform.Service.Battery);
 		if(!batteryStatus){
 		  batteryStatus = new this.platform.Service.Battery(name);
 		  waterSensor.addService(batteryStatus);
@@ -61,7 +60,9 @@ export class leakSensor {
 		}
 		batteryStatus
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt);
+		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt)
+			.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
+			.setCharacteristic(this.platform.Characteristic.BatteryLevel, Number(!batt) * 100);
 
 		return waterSensor;
 	}

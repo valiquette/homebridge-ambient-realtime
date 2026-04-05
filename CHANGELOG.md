@@ -1,5 +1,15 @@
 # Changes
 
+## 0.2.0
+Bug Fixes
+-  added entry for station model info in configuration page
+-  added support for WH31SM sensor
+-  added option to include battery sensor for custom sensors
+-  display battery status as full when not in alarm
+-  fix bug when removing accessories
+-  fix bug when adding multiple leak sensors
+-  code cleanup
+
 ## 0.1.15
 update
 -  improved logging for battery warnings

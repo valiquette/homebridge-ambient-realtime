@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } from 'homebridge';
-import type { ambientPlatform } from 'homebridge-ambient-realtime/src/ambient_platform.js';
+import type { ambientPlatform } from '../ambient_platform.js';
 
 export class poolSensor {
 	public readonly Service!: typeof Service;
@@ -11,13 +11,13 @@ export class poolSensor {
 	createAccessory(device: any, uuid: string, poolSensor: PlatformAccessory, name: any) {
 		const index: any = name.substring(name.length-1)*1;
 		const temp = ((device.lastData[`temp${index}f`] - 32 + 0.01) * 5 / 9).toFixed(1) || 0;
-		const batt = !device.lastData[`batt${index}`] || 0;  //1=OK, 0=Low
+		const batt = Number(!device.lastData[`batt${index}`]) || 0;  //1=OK, 0=Low
 
 		if(!poolSensor){
-			this.platform.log.info('Adding Pool sensor %s for %s', name, device.info.name);
+			this.platform.log.info('Adding Waterproof sensor %s for %s', name, device.info.name);
 			poolSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.platform.log.debug('Update %s Pool sensor', `${device.info.name} ${name}`);
+			this.platform.log.debug('Update %s Waterproof sensor', `${device.info.name} ${name}`);
 		}
 		poolSensor.getService(this.platform.Service.AccessoryInformation)!
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
@@ -25,7 +25,7 @@ export class poolSensor {
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
 		  .setCharacteristic(this.platform.Characteristic.Model, 'WH31P');
 
-		let tempSensor=poolSensor.getService(this.platform.Service.TemperatureSensor);
+		let tempSensor = poolSensor.getService(this.platform.Service.TemperatureSensor);
 		if(!tempSensor){
 			tempSensor = new this.platform.Service.TemperatureSensor(name);
 		  poolSensor.addService(tempSensor);
@@ -52,8 +52,10 @@ export class poolSensor {
 		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 		  }
 		  batteryStatus
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt);
+				.setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
+				.setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt)
+				.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
+				.setCharacteristic(this.platform.Characteristic.BatteryLevel, batt * 100);
 
 		} else {
 		  if(batteryStatus){
@@ -78,7 +80,7 @@ export class poolSensor {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.platform.log.warn('Pool Sensor %s Battery Status Low', name);
+				this.platform.log.warn('Waterproof Sensor %s Battery Status Low', name);
 			}
 		}catch (error) {
 			this.platform.log.error('caught low battery error');

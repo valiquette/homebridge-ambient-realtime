@@ -10,12 +10,14 @@ export class tempSensor {
 	){}
 	createAccessory(device: any, uuid: string, indoorSensor: PlatformAccessory, name: any) {
 		let index: any = name.substring(name.length-1)*1;
+		let model: any ='WH31E';
 		if(!Number.isInteger(index)){
 			index = 'in';
+			model ='WH32B';
 		}
 		const temp = ((device.lastData[`temp${index}f`] - 32 + 0.01) * 5 / 9).toFixed(1) || 0;
 		const humidity = device.lastData[`humidity${index}`] || 0;
-		const batt = !device.lastData[`batt${index}`] || 0;  //1=OK, 0=Low
+		const batt = Number(!device.lastData[`batt${index}`]) || 0;  //1=OK, 0=Low
 
 		if(!indoorSensor){
 			this.platform.log.info('Adding Temp & Humidity sensor %s for %s', name, device.info.name);
@@ -27,7 +29,7 @@ export class tempSensor {
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-		  .setCharacteristic(this.platform.Characteristic.Model, 'WH32');
+		  .setCharacteristic(this.platform.Characteristic.Model, model);
 
 		let tempSensor=indoorSensor.getService(this.platform.Service.TemperatureSensor);
 		if(!tempSensor){
@@ -42,7 +44,6 @@ export class tempSensor {
 		tempSensor
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, temp);
 
 		let humSensor=indoorSensor.getService(this.platform.Service.HumiditySensor);
@@ -59,10 +60,9 @@ export class tempSensor {
 		humSensor
 			.setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 			.setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-			.setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 			.setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, humidity);
 
-		let batteryStatus=indoorSensor.getService(this.platform.Service.Battery);
+		let batteryStatus = indoorSensor.getService(this.platform.Service.Battery);
 		if(device.lastData[`batt${index}`] !== undefined){
 		  if(!batteryStatus){
 		  batteryStatus = new this.platform.Service.Battery(name);
@@ -73,8 +73,10 @@ export class tempSensor {
 		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 		  }
 		  batteryStatus
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt);
+				.setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
+				.setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt)
+			  .setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
+				.setCharacteristic(this.platform.Characteristic.BatteryLevel, batt * 100);
 
 		} else {
 		  if(batteryStatus){

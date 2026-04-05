@@ -22,10 +22,10 @@ export class occupancySensor {
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-		  .setCharacteristic(this.platform.Characteristic.Model, 'WS')
+		  .setCharacteristic(this.platform.Characteristic.Model, 'Custom-' + newSensor.name)
 		  .setCharacteristic(this.platform.Characteristic.ProductData, 'occupancy');
 
-		let sensor=occupancySensor.getService(this.platform.Service.OccupancySensor);
+		let sensor = occupancySensor.getService(this.platform.Service.OccupancySensor);
 		if(!sensor){
 		  sensor = new this.platform.Service.OccupancySensor(newSensor.name);
 		  occupancySensor.addService(sensor);
@@ -47,6 +47,24 @@ export class occupancySensor {
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.OccupancyDetected, occupancy)
 		  .setCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel, value);
+
+		if(newSensor.dataPointBatt !== undefined){
+			let batteryStatus = occupancySensor.getService(this.platform.Service.Battery);
+			if(!batteryStatus){
+				batteryStatus = new this.platform.Service.Battery(newSensor.name);
+				occupancySensor.addService(batteryStatus);
+
+				batteryStatus
+					.getCharacteristic(this.platform.Characteristic.StatusLowBattery)
+					.onGet(this.getStatusLowBattery.bind(this, batteryStatus, newSensor.name));
+			}
+			batteryStatus
+				.setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
+				.setCharacteristic(this.platform.Characteristic.StatusLowBattery, device.lastData[newSensor.dataPointBatt])
+				.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
+				.setCharacteristic(this.platform.Characteristic.BatteryLevel, Number(!device.lastData[newSensor.dataPointBatt]) * 100);
+		}
+
 		return occupancySensor;
 	}
 
@@ -57,5 +75,18 @@ export class occupancySensor {
 			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.OccupancyDetected).value;
 			return currentValue;
 		}
+	}
+
+	async getStatusLowBattery(batteryStatus: Service, name: any): Promise<CharacteristicValue> {
+		let currentValue: any = 0;
+		try{
+			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
+			if (currentValue === 1) {
+				this.platform.log.warn('Leak Detector %s Battery Status Low', name);
+			}
+		}catch (error) {
+			this.platform.log.error('caught low battery error');
+		}
+		return currentValue;
 	}
 }
