@@ -36,6 +36,12 @@
 				"required": true,
 				"default": true
 			},
+			"StationModel":{
+				"title": "Weather Station Model",
+				"type": "string",
+				"required": false,
+				"placeholder": "WS-4000"
+			},
 			"showIndoor":{
 				"title": "Show Indoor Temperature and Humidity WH32B",
 				"type": "boolean",
@@ -66,6 +72,11 @@
 				"required": true,
 				"default": false
 			},
+			"showSoil":{
+				"title": "Show Soil Moisture Sensors WH31SM",
+				"type": "boolean",
+				"default": false
+			},
 			"showLeak":{
 				"title": "Show Leak Sensors WH31LA",
 				"type": "boolean",
@@ -92,6 +103,13 @@
 							"minLength": 2,
 							"required": true,
 							"placeholder": "windspeedmph"
+						},
+						"dataPointBatt": {
+							"title": "Data point for this sensor battery",
+							"type": "string",
+							"minLength": 2,
+							"required": false,
+							"placeholder": "batt_lightning"
 						},
 						"threshold": {
 							"title": "threshold exceeded to trigger detection",
@@ -167,11 +185,13 @@
 			"expandable": true,
 			"items": [
 				"showOutdoor",
+				"StationModel",
 				"showIndoor",
 				"showAqin",
 				"showIndoorAir",
 				"showOutdoorAir",
 				"showOtherTemp",
+				"showSoil",
 				"showLeak"
 			]
 		},
@@ -187,18 +207,19 @@
 		"type": "help",
 		"helpvalue": "<h5><b>Optional</b></h5><p class='help-block'> Reference Readme file <a target='blank' href='https://github.com/valiquette/homebridge-Ambient-realtime#readme'>here</a> for more information.</p>"
  		},
-	{
-		"key": "sensors",
-		"type": "tabarray",
-		"title": "{{ value.name || 'new Sensor' }}",
-		"description": "Create custom sensors to show in Homekit",
-		"expandable": true,
-		"items": [
-			"sensors[].name",
-			"sensors[].dataPoint",
-			"sensors[].threshold",
-			"sensors[].type"
-				]
-	}
+		{
+			"key": "sensors",
+			"type": "tabarray",
+			"title": "{{ value.name || 'new Sensor' }}",
+			"description": "Create custom sensors to show in Homekit",
+			"expandable": true,
+			"items": [
+				"sensors[].name",
+				"sensors[].dataPoint",
+				"sensors[].dataPointBatt",
+				"sensors[].threshold",
+				"sensors[].type"
+			]
+		}
 	]
 }

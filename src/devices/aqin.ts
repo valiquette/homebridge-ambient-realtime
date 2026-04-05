@@ -20,9 +20,9 @@ export class aqinSensor {
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-		  .setCharacteristic(this.platform.Characteristic.Model, 'WS45');
+		  .setCharacteristic(this.platform.Characteristic.Model, 'AQIN');
 
-		let tempSensor=aqinSensor.getService(this.platform.Service.TemperatureSensor);
+		let tempSensor = aqinSensor.getService(this.platform.Service.TemperatureSensor);
 		if(!tempSensor){
 		  tempSensor = new this.platform.Service.TemperatureSensor(name);
 		  aqinSensor.addService(tempSensor);
@@ -35,10 +35,9 @@ export class aqinSensor {
 		tempSensor
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, ((device.lastData.pm_in_temp_aqin- 32 + .01) * 5 / 9).toFixed(1));
 
-		let humSensor=aqinSensor.getService(this.platform.Service.HumiditySensor);
+		let humSensor = aqinSensor.getService(this.platform.Service.HumiditySensor);
 		if(!humSensor){
 		  humSensor = new this.platform.Service.HumiditySensor(name);
 		  aqinSensor.addService(humSensor);
@@ -52,10 +51,9 @@ export class aqinSensor {
 		humSensor
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, device.lastData.pm_in_humidity_aqin);
 
-		let airSensor=aqinSensor.getService(this.platform.Service.AirQualitySensor);
+		let airSensor = aqinSensor.getService(this.platform.Service.AirQualitySensor);
 		if(!airSensor){
 		  airSensor = new this.platform.Service.AirQualitySensor(name);
 		  aqinSensor.addService(airSensor);
@@ -84,7 +82,6 @@ export class aqinSensor {
 		airSensor
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.platform.Characteristic.AirQuality, aqi)
 		  .setCharacteristic(this.platform.Characteristic.PM10Density, device.lastData.pm10_in_aqin)
 		  .setCharacteristic(this.platform.Characteristic.PM2_5Density, device.lastData.pm25_in_aqin);
@@ -111,12 +108,11 @@ export class aqinSensor {
 		co2Sensor
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW)
 		  .setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, co2)
 		  .setCharacteristic(this.platform.Characteristic.CarbonDioxideLevel, device.lastData.co2_in_aqin)
 		  .setCharacteristic(this.platform.Characteristic.CarbonDioxidePeakLevel, device.lastData.co2_in_24h_aqin);
 
-		let batteryStatus=aqinSensor.getService(this.platform.Service.Battery);
+		let batteryStatus = aqinSensor.getService(this.platform.Service.Battery);
 		if(!batteryStatus){
 		  batteryStatus = new this.platform.Service.Battery(name);
 		  aqinSensor.addService(batteryStatus);
@@ -127,7 +123,9 @@ export class aqinSensor {
 		}
 		batteryStatus
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_co2);
+		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_co2)
+			.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
+			.setCharacteristic(this.platform.Characteristic.BatteryLevel, (device.lastData.batt_co2) * 100);
 
 		return aqinSensor;
 	}

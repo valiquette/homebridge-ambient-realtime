@@ -20,7 +20,7 @@ export class station {
 			  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 			  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 			  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-			  .setCharacteristic(this.platform.Characteristic.Model, this.platform.config.station ? this.platform.config.station : 'WS4000');
+			  .setCharacteristic(this.platform.Characteristic.Model, this.platform.config.station ? this.platform.config.station : 'WS');
 
 			let tempSensor = weatherStation.getService(this.platform.Service.TemperatureSensor);
 			if(!tempSensor){
@@ -35,7 +35,6 @@ export class station {
 			tempSensor
 			  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 			  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-			  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 			  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, ((device.lastData.tempf- 32 + .01) * 5 / 9).toFixed(1));
 
 			let humSensor = weatherStation.getService(this.platform.Service.HumiditySensor);
@@ -52,7 +51,6 @@ export class station {
 			humSensor
 			  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 			  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-			  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 			  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, device.lastData.humidity);
 
 			let batteryStatus = weatherStation.getService(this.platform.Service.Battery);
@@ -67,7 +65,9 @@ export class station {
 			  }
 			  batteryStatus
 			    .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-			    .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.battout);
+			    .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.battout)
+					.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
+					.setCharacteristic(this.platform.Characteristic.BatteryLevel, (device.lastData.battout) * 100);
 
 			} else {
 			  if(batteryStatus){

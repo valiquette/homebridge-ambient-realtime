@@ -2,31 +2,31 @@
 import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } from 'homebridge';
 import type { ambientPlatform } from '../ambient_platform.js';
 
-export class airSensor {
+export class airSensorIn {
 	public readonly Service!: typeof Service;
 	public readonly Characteristic!: typeof Characteristic;
 	constructor(
 		private readonly platform: ambientPlatform,
 	){}
-	createAccessory(device: any, uuid: string, airSensorOut: PlatformAccessory) {
-		const name ='Outdoor Air Quality';
+	createAccessory(device: any, uuid: string, airSensorIn: PlatformAccessory) {
+		const name ='Indoor Air Quality';
 
-		if(!airSensorOut){
-			this.platform.log.info('Adding outdoor air quality sensor for %s', device.info.name);
-			airSensorOut = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
+		if(!airSensorIn){
+			this.platform.log.info('Adding indoor air quality sensor for %s', device.info.name);
+			airSensorIn = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.platform.log.debug('Update %s PM25', `${device.info.name} ${name}`);
+			this.platform.log.debug('Update %s PM25IN', `${device.info.name} ${name}`);
 		}
-		airSensorOut.getService(this.platform.Service.AccessoryInformation)!
+		airSensorIn.getService(this.platform.Service.AccessoryInformation)!
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
 		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-		  .setCharacteristic(this.platform.Characteristic.Model, 'PM25');
+		  .setCharacteristic(this.platform.Characteristic.Model, 'PM25IN');
 
-		let airSensor = airSensorOut.getService(this.platform.Service.AirQualitySensor);
+		let airSensor=airSensorIn.getService(this.platform.Service.AirQualitySensor);
 		if(!airSensor){
 		  airSensor = new this.platform.Service.AirQualitySensor(name);
-		  airSensorOut.addService(airSensor);
+		  airSensorIn.addService(airSensor);
 		  airSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
 		  airSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		  airSensor
@@ -52,12 +52,12 @@ export class airSensor {
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.platform.Characteristic.AirQuality, aqi)
-		  .setCharacteristic(this.platform.Characteristic.PM2_5Density, device.lastData.pm25);
+		  .setCharacteristic(this.platform.Characteristic.PM2_5Density, device.lastData.pm25_in);
 
-		let batteryStatus = airSensorOut.getService(this.platform.Service.Battery);
+		let batteryStatus = airSensorIn.getService(this.platform.Service.Battery);
 		if(!batteryStatus){
 		  batteryStatus = new this.platform.Service.Battery(name);
-		  airSensorOut.addService(batteryStatus);
+		  airSensorIn.addService(batteryStatus);
 
 		  batteryStatus
 		    .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
@@ -65,12 +65,11 @@ export class airSensor {
 		}
 		batteryStatus
 		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_25)
+		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_25_in)
 			.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
-			.setCharacteristic(this.platform.Characteristic.BatteryLevel, (device.lastData.batt_25) * 100);
+			.setCharacteristic(this.platform.Characteristic.BatteryLevel, (device.lastData.batt_25_in) * 100);
 
-
-		return airSensorOut;
+		return airSensorIn;
 	}
 
 	async getStatusAir(sensorStatus: Service): Promise<CharacteristicValue> {
