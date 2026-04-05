@@ -7,7 +7,7 @@ Bug Fixes
 -  added option to include battery for custom sensors
 -  display battery status ad full when not in alarm
 -  fix bug when removing accessories
--  fix bug when adding mulitiple leak sensors
+-  fix bug when adding multiple leak sensors
 -  code cleanup
 
 ## 0.1.15
