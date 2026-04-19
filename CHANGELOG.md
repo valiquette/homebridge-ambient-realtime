@@ -1,5 +1,9 @@
 # Changes
 
+## 0.2.1
+Bug Fixes
+-  fixed station battery charateristic warning
+
 ## 0.2.0
 Bug Fixes
 -  added entry for station model info in configuration page
