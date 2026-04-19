@@ -131,7 +131,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		socket.on('data', (data) => {
 			//this.log.debug('data',JSON.stringify(data,null,2));
 			if (this.showSocketData) {
-				this.log.debug('data recieved %s current outdoor temp %s°F humidity %s', data.date, data.tempf, data.humidity);
+				this.log.debug('data recieved %s current outdoor temp %s°F humidity %s battery %s', data.date, data.tempf, data.humidity, data.battout ? 'good' : 'bad');
 			}
 
 			//**** Testing *****//
@@ -435,7 +435,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
 					humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidity);
 					batteryStatus = this.weatherStation.getService(this.Service.Battery);
-					if (batteryStatus) {
+					if (batteryStatus && Number.isFinite(data.battout)) {
 						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battout);
 						batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.battout)*100);
 					}
@@ -455,7 +455,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
 						humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
 						batteryStatus = this.weatherStation.getService(this.Service.Battery);
-						if (batteryStatus) {
+						if (batteryStatus && Number.isFinite(data.battin)) {
 							batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battin);
 							batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.battin)*100);
 						}
@@ -477,9 +477,11 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 							humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
 							humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data[`humidity${n}`]);
 						}
-						batteryStatus = this.weatherStation.getService(this.Service.Battery);
-						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data[`batt${n}`]);
-						batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data[`batt${n}`])*100);
+						if (Number.isFinite(data[`batt${n}`])) {
+							batteryStatus = this.weatherStation.getService(this.Service.Battery);
+							batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data[`batt${n}`]);
+							batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data[`batt${n}`])*100);
+						}
 					}
 				}
 			}
@@ -500,9 +502,11 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 							humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
 							humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data[`soilhum${n}`]);
 						}
-						batteryStatus = this.weatherStation.getService(this.Service.Battery);
-						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data[`battsm${n}`]);
-						batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data[`battsm${n}`])*100);
+						if (Number.isFinite(data[`battsm${n}`])) {
+							batteryStatus = this.weatherStation.getService(this.Service.Battery);
+							batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data[`battsm${n}`]);
+							batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data[`battsm${n}`])*100);
+						}
 					}
 				}
 			}
@@ -519,6 +523,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 							leakSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
 							batteryStatus = this.weatherStation.getService(this.Service.Battery);
 							batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(data[`batleak${n}`]);
+							batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue(Number(!data[`batleak${n}`])*100);
 						} else {
 							leakSensor.getCharacteristic(this.Characteristic.StatusActive).updateValue(true);
 							leakSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
@@ -578,8 +583,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					}
 
 					batteryStatus = this.weatherStation.getService(this.Service.Battery);
-					batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_co2);
-					batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.batt_co2)*100);
+					if (batteryStatus && Number.isFinite(data.batt_co2)) {
+						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_co2);
+						batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.batt_co2)*100);
+					}
 				}
 			}
 
@@ -609,7 +616,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					}
 
 					batteryStatus=this.weatherStation.getService(this.Service.Battery);
-					if(batteryStatus){
+					if (batteryStatus && Number.isFinite(data.batt_25_in)) {
 						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in);
 						batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.batt_25_in)*100);
 
@@ -643,8 +650,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					}
 
 					batteryStatus = this.weatherStation.getService(this.Service.Battery);
-					batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25);
-					batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.batt_25)*100);
+					if (batteryStatus && Number.isFinite(data.batt_25)) {
+						batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25);
+						batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue((data.batt_25)*100);
+					}
 				}
 			}
 
@@ -665,7 +674,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 								sensor.getCharacteristic(this.Characteristic.MotionDetected).updateValue(motion);
 								sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
 								batteryStatus = this.weatherStation.getService(this.Service.Battery);
-								if(batteryStatus){
+								if (batteryStatus && Number.isFinite(batt)) {
 									batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(batt);
 									batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue(Number(!batt)*100);
 								}
@@ -675,7 +684,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 								sensor.getCharacteristic(this.Characteristic.OccupancyDetected).updateValue(motion);
 								sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
 								batteryStatus = this.weatherStation.getService(this.Service.Battery);
-								if(batteryStatus){
+								if (batteryStatus && Number.isFinite(batt)) {
 									batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(batt);
 									batteryStatus.getCharacteristic(this.Characteristic.BatteryLevel).updateValue(Number(!batt)*100);
 								}
