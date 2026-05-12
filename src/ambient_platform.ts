@@ -178,7 +178,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -203,7 +203,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device indoor', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -227,7 +227,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device aqin index %s', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 					if (this.showAirIn && device.lastData.pm25_in) {
@@ -250,7 +250,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device aqin', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -274,7 +274,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device aqin', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -307,7 +307,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						} else if (this.accessories[index]) {
 							this.log.debug('Removed cached device temp%s', n);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -332,7 +332,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						} else if (this.accessories[index]) {
 							this.log.debug('Removed cached device soil%s', n);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -356,7 +356,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 						} else if (this.accessories[index]) {
 							this.log.debug('Removed cached device leak%s', n);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -372,7 +372,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 									if ((checkType.value === 'motion' && sensor.type === 1) || (checkType.value === 'occupancy' && sensor.type === 0)) {
 										this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit');
 										this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-										this.accessories.splice(1, index);
+										this.accessories.splice(index, 1);
 									}
 								}
 								if (!this.accessories[index]) {
@@ -397,7 +397,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 								if (this.accessories[index]) {
 									this.log.debug('Removed cached device', index);
 									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-									this.accessories.splice(1, index);
+									this.accessories.splice(index, 1);
 								}
 							}
 						});
