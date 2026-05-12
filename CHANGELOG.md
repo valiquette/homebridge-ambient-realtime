@@ -1,5 +1,10 @@
 # Changes
 
+## 0.2.2
+update
+-  code cleanup
+-  bumped dependencies
+
 ## 0.2.1
 Bug Fixes
 -  fixed station battery charateristic warning

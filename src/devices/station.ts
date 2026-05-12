@@ -1,73 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } from 'homebridge';
-import type { ambientPlatform } from '../ambient_platform.js';
+import type ambientPlatform from '../ambient_platform.js';
 
-export class station {
-	public readonly Service!: typeof Service;
-	public readonly Characteristic!: typeof Characteristic;
+export default class station {
+	public readonly Service: typeof Service;
+	public readonly Characteristic: typeof Characteristic;
 	constructor(
 		private readonly platform: ambientPlatform,
-	){}
+		private log = platform.log,
+	) {
+		this.Service = platform.Service;
+		this.Characteristic = platform.Characteristic;
+	}
+
 	createAccessory(device: any, uuid: string, weatherStation: PlatformAccessory) {
 		const name = 'Outdoor';
 		 if(!weatherStation){
-			this.platform.log.info('Adding Outdoor sensors for %s', device.info.name);
+			this.log.info('Adding Outdoor sensors for %s', device.info.name);
 			weatherStation = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.platform.log.debug('Update %s Weather Station', `${device.info.name} ${name}`);
+			this.log.debug('Update %s Weather Station', `${device.info.name} ${name}`);
 		}
-			weatherStation.getService(this.platform.Service.AccessoryInformation)!
-			  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-			  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
-			  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-			  .setCharacteristic(this.platform.Characteristic.Model, this.platform.config.station ? this.platform.config.station : 'WS');
+			weatherStation.getService(this.Service.AccessoryInformation)!
+			  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+			  .setCharacteristic(this.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
+			  .setCharacteristic(this.Characteristic.SerialNumber, device.macAddress)
+			  .setCharacteristic(this.Characteristic.Model, this.platform.config.station ? this.platform.config.station : 'WS');
 
-			let tempSensor = weatherStation.getService(this.platform.Service.TemperatureSensor);
+			let tempSensor = weatherStation.getService(this.Service.TemperatureSensor);
 			if(!tempSensor){
-			  tempSensor = new this.platform.Service.TemperatureSensor(name);
+			  tempSensor = new this.Service.TemperatureSensor(name);
 			  weatherStation.addService(tempSensor);
-			  tempSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-			  tempSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
+			  tempSensor.addCharacteristic(this.Characteristic.ConfiguredName);
+			  tempSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 			  tempSensor
-			    .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+			    .getCharacteristic(this.Characteristic.CurrentTemperature)
 			    .onGet(this.getStatusTemp.bind(this, tempSensor));
 			}
 			tempSensor
-			  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-			  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-			  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, ((device.lastData.tempf- 32 + .01) * 5 / 9).toFixed(1));
+			  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+			  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
+			  .setCharacteristic(this.Characteristic.CurrentTemperature, ((device.lastData.tempf- 32 + .01) * 5 / 9).toFixed(1));
 
-			let humSensor = weatherStation.getService(this.platform.Service.HumiditySensor);
+			let humSensor = weatherStation.getService(this.Service.HumiditySensor);
 			if(!humSensor){
-			  humSensor = new this.platform.Service.HumiditySensor(name);
+			  humSensor = new this.Service.HumiditySensor(name);
 			  weatherStation.addService(humSensor);
-			  humSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-			  humSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
+			  humSensor.addCharacteristic(this.Characteristic.ConfiguredName);
+			  humSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 			  humSensor
-			    .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+			    .getCharacteristic(this.Characteristic.CurrentRelativeHumidity)
 			    .onGet(this.getStatusHum.bind(this, humSensor));
 			}
 
 			humSensor
-			  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-			  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-			  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, device.lastData.humidity);
+			  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+			  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
+			  .setCharacteristic(this.Characteristic.CurrentRelativeHumidity, device.lastData.humidity);
 
-			let batteryStatus = weatherStation.getService(this.platform.Service.Battery);
+			let batteryStatus = weatherStation.getService(this.Service.Battery);
 			if(device.lastData.battout !== undefined){
 			  if(!batteryStatus){
-			    batteryStatus = new this.platform.Service.Battery(name);
+			    batteryStatus = new this.Service.Battery(name);
 			    weatherStation.addService(batteryStatus);
 
 			    batteryStatus
-			      .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
+			      .getCharacteristic(this.Characteristic.StatusLowBattery)
 			      .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 			  }
 			  batteryStatus
-			    .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-			    .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.battout)
-					.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
-					.setCharacteristic(this.platform.Characteristic.BatteryLevel, (device.lastData.battout) * 100);
+			    .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+			    .setCharacteristic(this.Characteristic.StatusLowBattery, !device.lastData.battout)
+					.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
+					.setCharacteristic(this.Characteristic.BatteryLevel, (device.lastData.battout) * 100);
 
 			} else {
 			  if(batteryStatus){
@@ -79,19 +84,19 @@ export class station {
 	}
 
 	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
-		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
-			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
+			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentTemperature).value;
 			return currentValue;
 		}
 	}
 
 	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
-		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
-			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value;
+			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value;
 			return currentValue;
 		}
 	}
@@ -99,12 +104,12 @@ export class station {
 	 async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
 		let currentValue: any = 0;
 		try{
-			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
+			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.platform.log.warn('Station Battery Status Low');
+				this.log.warn('Station Battery Status Low');
 			}
 		}catch (error) {
-			this.platform.log.error('caught low battery error');
+			this.log.error('caught low battery error');
 		}
 		return currentValue;
 	}

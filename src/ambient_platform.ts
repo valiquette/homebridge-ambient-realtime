@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, HAPStatus, HapStatusError, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
-import { station } from './devices/station.js';
-import { tempSensor } from './devices/temp.js';
-import { poolSensor } from './devices/pool.js';
-import { soilSensor } from './devices/soil.js';
-import { aqinSensor } from './devices/aqin.js';
-import { airSensor } from './devices/air.js';
-import { airSensorIn } from './devices/air_in.js';
-import { leakSensor } from './devices/leak.js';
-import { motionSensor } from './devices/motion.js';
-import { occupancySensor } from './devices/occupancy.js';
+import station from './devices/station.js';
+import tempSensor from './devices/temp.js';
+import poolSensor from './devices/pool.js';
+import soilSensor from './devices/soil.js';
+import aqinSensor from './devices/aqin.js';
+import airSensor from './devices/air.js';
+import airSensorIn from './devices/air_in.js';
+import leakSensor from './devices/leak.js';
+import motionSensor from './devices/motion.js';
+import occupancySensor from './devices/occupancy.js';
 
 import { io } from 'socket.io-client';
 
@@ -22,12 +22,13 @@ import { io } from 'socket.io-client';
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export class ambientPlatform implements DynamicPlatformPlugin {
+
+export default class ambientPlatform implements DynamicPlatformPlugin {
 	[x: string]: any;
 	public readonly Service: typeof Service;
 	public readonly Characteristic: typeof Characteristic;
-
-	// this is used to track restored cached accessories
+	public readonly HAPStatus!: typeof HAPStatus;
+	public readonly HapStatusError: typeof HapStatusError;
 	public readonly accessories: PlatformAccessory[] = [];
 
 	constructor(
@@ -37,6 +38,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 	) {
 		this.Service = api.hap.Service;
 		this.Characteristic = api.hap.Characteristic;
+		this.HapStatusError = api.hap.HapStatusError;
 		this.genUUID = api.hap.uuid.generate;
 
 		this.log.debug('Finished initializing platform:', config.name);
