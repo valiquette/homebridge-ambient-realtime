@@ -33,14 +33,19 @@ export default class station {
 			  weatherStation.addService(tempSensor);
 			  tempSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 			  tempSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
+				/*
 			  tempSensor
 			    .getCharacteristic(this.Characteristic.CurrentTemperature)
 			    .onGet(this.getStatusTemp.bind(this, tempSensor));
+				*/
 			}
 			tempSensor
 			  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 			  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 			  .setCharacteristic(this.Characteristic.CurrentTemperature, ((device.lastData.tempf- 32 + .01) * 5 / 9).toFixed(1));
+			tempSensor
+				.getCharacteristic(this.Characteristic.CurrentTemperature)
+				.onGet(this.getStatusTemp.bind(this, tempSensor));
 
 			let humSensor = weatherStation.getService(this.Service.HumiditySensor);
 			if(!humSensor){
@@ -63,17 +68,15 @@ export default class station {
 			  if(!batteryStatus){
 			    batteryStatus = new this.Service.Battery(name);
 			    weatherStation.addService(batteryStatus);
-
-			    batteryStatus
-			      .getCharacteristic(this.Characteristic.StatusLowBattery)
-			      .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 			  }
 			  batteryStatus
 			    .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 			    .setCharacteristic(this.Characteristic.StatusLowBattery, !device.lastData.battout)
 					.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 					.setCharacteristic(this.Characteristic.BatteryLevel, (device.lastData.battout) * 100);
-
+				batteryStatus
+					.getCharacteristic(this.Characteristic.StatusLowBattery)
+					.onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 			} else {
 			  if(batteryStatus){
 			   weatherStation.removeService(batteryStatus);

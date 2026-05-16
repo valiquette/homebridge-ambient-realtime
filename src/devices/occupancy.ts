@@ -37,9 +37,6 @@ export default class occupancySensor {
 		  sensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  sensor.addCharacteristic(this.Characteristic.CurrentAmbientLightLevel);
 		  sensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${newSensor.name}`);
-		  sensor
-		    .getCharacteristic(this.Characteristic.OccupancyDetected)
-		    .onGet(this.getStatusoccupancy.bind(this, sensor));
 		}
 		sensor
 		  .getCharacteristic(this.Characteristic.CurrentAmbientLightLevel)
@@ -52,22 +49,24 @@ export default class occupancySensor {
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.OccupancyDetected, occupancy)
 		  .setCharacteristic(this.Characteristic.CurrentAmbientLightLevel, value);
+		sensor
+			.getCharacteristic(this.Characteristic.OccupancyDetected)
+			.onGet(this.getStatusoccupancy.bind(this, sensor));
 
 		if(newSensor.dataPointBatt !== undefined){
 			let batteryStatus = occupancySensor.getService(this.Service.Battery);
 			if(!batteryStatus){
 				batteryStatus = new this.Service.Battery(newSensor.name);
 				occupancySensor.addService(batteryStatus);
-
-				batteryStatus
-					.getCharacteristic(this.Characteristic.StatusLowBattery)
-					.onGet(this.getStatusLowBattery.bind(this, batteryStatus, newSensor.name));
 			}
 			batteryStatus
 				.setCharacteristic(this.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 				.setCharacteristic(this.Characteristic.StatusLowBattery, device.lastData[newSensor.dataPointBatt])
 				.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 				.setCharacteristic(this.Characteristic.BatteryLevel, Number(!device.lastData[newSensor.dataPointBatt]) * 100);
+			batteryStatus
+				.getCharacteristic(this.Characteristic.StatusLowBattery)
+				.onGet(this.getStatusLowBattery.bind(this, batteryStatus, newSensor.name));
 		}
 
 		return occupancySensor;

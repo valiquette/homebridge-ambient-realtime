@@ -37,9 +37,6 @@ export default class motionSensor {
 		  sensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  sensor.addCharacteristic(this.Characteristic.CurrentAmbientLightLevel);
 		  sensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${newSensor.name}`);
-		  sensor
-		    .getCharacteristic(this.Characteristic.MotionDetected)
-		    .onGet(this.getStatusMotion.bind(this, sensor));
 		}
 		sensor
 		  .getCharacteristic(this.Characteristic.CurrentAmbientLightLevel)
@@ -52,22 +49,24 @@ export default class motionSensor {
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.MotionDetected, motion)
 		  .setCharacteristic(this.Characteristic.CurrentAmbientLightLevel, value);
+	  sensor
+	    .getCharacteristic(this.Characteristic.MotionDetected)
+		  .onGet(this.getStatusMotion.bind(this, sensor));
 
 		if(newSensor.dataPointBatt !== undefined){
 			let batteryStatus = motionSensor.getService(this.Service.Battery);
 			if(!batteryStatus){
 				batteryStatus = new this.Service.Battery(newSensor.name);
 				motionSensor.addService(batteryStatus);
-
-				batteryStatus
-					.getCharacteristic(this.Characteristic.StatusLowBattery)
-					.onGet(this.getStatusLowBattery.bind(this, batteryStatus, newSensor.name));
 			}
 			batteryStatus
 				.setCharacteristic(this.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
 				.setCharacteristic(this.Characteristic.StatusLowBattery, device.lastData[newSensor.dataPointBatt])
 				.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 				.setCharacteristic(this.Characteristic.BatteryLevel, Number(!device.lastData[newSensor.dataPointBatt]) * 100);
+			batteryStatus
+				.getCharacteristic(this.Characteristic.StatusLowBattery)
+				.onGet(this.getStatusLowBattery.bind(this, batteryStatus, newSensor.name));
 		}
 
 		return motionSensor;

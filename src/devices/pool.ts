@@ -36,32 +36,30 @@ export default class poolSensor {
 		  poolSensor.addService(tempSensor);
 		  tempSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  tempSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  tempSensor
-		    .getCharacteristic(this.Characteristic.CurrentTemperature)
-		    .onGet(this.getStatusTemp.bind(this, tempSensor));
 		}
 		tempSensor
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.StatusLowBattery, this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
 		  .setCharacteristic(this.Characteristic.CurrentTemperature, temp);
+		tempSensor
+			.getCharacteristic(this.Characteristic.CurrentTemperature)
+			.onGet(this.getStatusTemp.bind(this, tempSensor));
 
 		let batteryStatus=poolSensor.getService(this.Service.Battery);
 		if(device.lastData[`batt${index}`] !== undefined){
 		  if(!batteryStatus){
 		  batteryStatus = new this.Service.Battery(name);
 		  poolSensor.addService(batteryStatus);
-
-		  batteryStatus
-		    .getCharacteristic(this.Characteristic.StatusLowBattery)
-		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 		  }
 		  batteryStatus
 				.setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 				.setCharacteristic(this.Characteristic.StatusLowBattery, batt)
 				.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 				.setCharacteristic(this.Characteristic.BatteryLevel, batt * 100);
-
+			batteryStatus
+				.getCharacteristic(this.Characteristic.StatusLowBattery)
+				.onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 		} else {
 		  if(batteryStatus){
 			 poolSensor.removeService(batteryStatus);

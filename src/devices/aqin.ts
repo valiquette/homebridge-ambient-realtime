@@ -33,14 +33,14 @@ export default class aqinSensor {
 		  aqinSensor.addService(tempSensor);
 		  tempSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  tempSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  tempSensor
-		    .getCharacteristic(this.Characteristic.CurrentTemperature)
-		    .onGet(this.getStatusTemp.bind(this, tempSensor));
 		}
 		tempSensor
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.CurrentTemperature, ((device.lastData.pm_in_temp_aqin- 32 + .01) * 5 / 9).toFixed(1));
+	  tempSensor
+			.getCharacteristic(this.Characteristic.CurrentTemperature)
+			.onGet(this.getStatusTemp.bind(this, tempSensor));
 
 		let humSensor = aqinSensor.getService(this.Service.HumiditySensor);
 		if(!humSensor){
@@ -48,15 +48,15 @@ export default class aqinSensor {
 		  aqinSensor.addService(humSensor);
 		  humSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  humSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  humSensor
-		    .getCharacteristic(this.Characteristic.CurrentRelativeHumidity)
-		    .onGet(this.getStatusHum.bind(this, humSensor));
 		}
 
 		humSensor
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.CurrentRelativeHumidity, device.lastData.pm_in_humidity_aqin);
+		humSensor
+			.getCharacteristic(this.Characteristic.CurrentRelativeHumidity)
+			.onGet(this.getStatusHum.bind(this, humSensor));
 
 		let airSensor = aqinSensor.getService(this.Service.AirQualitySensor);
 		if(!airSensor){
@@ -64,9 +64,6 @@ export default class aqinSensor {
 		  aqinSensor.addService(airSensor);
 		  airSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  airSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  airSensor
-		    .getCharacteristic(this.Characteristic.AirQuality)
-		    .onGet(this.getStatusAir.bind(this, airSensor));
 		}
 
 		let aqi=this.Characteristic.AirQuality.UNKNOWN;
@@ -90,6 +87,9 @@ export default class aqinSensor {
 		  .setCharacteristic(this.Characteristic.AirQuality, aqi)
 		  .setCharacteristic(this.Characteristic.PM10Density, device.lastData.pm10_in_aqin)
 		  .setCharacteristic(this.Characteristic.PM2_5Density, device.lastData.pm25_in_aqin);
+		airSensor
+			.getCharacteristic(this.Characteristic.AirQuality)
+			.onGet(this.getStatusAir.bind(this, airSensor));
 
 
 		let co2Sensor=aqinSensor.getService(this.Service.CarbonDioxideSensor);
@@ -98,9 +98,6 @@ export default class aqinSensor {
 		  aqinSensor.addService(co2Sensor);
 		  co2Sensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  co2Sensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  co2Sensor
-		    .getCharacteristic(this.Characteristic.CarbonDioxideDetected)
-		    .onGet(this.getStatusCo2.bind(this, co2Sensor));
 		}
 
 		let co2;
@@ -116,21 +113,23 @@ export default class aqinSensor {
 		  .setCharacteristic(this.Characteristic.CarbonDioxideDetected, co2)
 		  .setCharacteristic(this.Characteristic.CarbonDioxideLevel, device.lastData.co2_in_aqin)
 		  .setCharacteristic(this.Characteristic.CarbonDioxidePeakLevel, device.lastData.co2_in_24h_aqin);
+		co2Sensor
+			.getCharacteristic(this.Characteristic.CarbonDioxideDetected)
+			.onGet(this.getStatusCo2.bind(this, co2Sensor));
 
 		let batteryStatus = aqinSensor.getService(this.Service.Battery);
 		if(!batteryStatus){
 		  batteryStatus = new this.Service.Battery(name);
 		  aqinSensor.addService(batteryStatus);
-
-		  batteryStatus
-		    .getCharacteristic(this.Characteristic.StatusLowBattery)
-		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 		}
 		batteryStatus
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusLowBattery, !device.lastData.batt_co2)
 			.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 			.setCharacteristic(this.Characteristic.BatteryLevel, (device.lastData.batt_co2) * 100);
+		batteryStatus
+			.getCharacteristic(this.Characteristic.StatusLowBattery)
+			.onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 
 		return aqinSensor;
 	}

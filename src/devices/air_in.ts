@@ -34,9 +34,6 @@ export default class airSensorIn {
 		  airSensorIn.addService(airSensor);
 		  airSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  airSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  airSensor
-		    .getCharacteristic(this.Characteristic.AirQuality)
-		    .onGet(this.getStatusAir.bind(this, airSensor));
 		}
 
 		let aqi=this.Characteristic.AirQuality.UNKNOWN;
@@ -58,21 +55,24 @@ export default class airSensorIn {
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.AirQuality, aqi)
 		  .setCharacteristic(this.Characteristic.PM2_5Density, device.lastData.pm25_in);
+		airSensor
+			.getCharacteristic(this.Characteristic.AirQuality)
+			.onGet(this.getStatusAir.bind(this, airSensor));
 
 		let batteryStatus = airSensorIn.getService(this.Service.Battery);
 		if(!batteryStatus){
 		  batteryStatus = new this.Service.Battery(name);
 		  airSensorIn.addService(batteryStatus);
 
-		  batteryStatus
-		    .getCharacteristic(this.Characteristic.StatusLowBattery)
-		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 		}
 		batteryStatus
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusLowBattery, !device.lastData.batt_25_in)
 			.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 			.setCharacteristic(this.Characteristic.BatteryLevel, (device.lastData.batt_25_in) * 100);
+		batteryStatus
+			.getCharacteristic(this.Characteristic.StatusLowBattery)
+			.onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 
 		return airSensorIn;
 	}

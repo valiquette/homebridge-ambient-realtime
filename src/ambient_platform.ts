@@ -44,6 +44,7 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 		this.log.debug('Finished initializing platform:', config.name);
 
 		this.timeStamp = new Date();
+		this.reconnected = false;
 		this.endpoint = 'https://rt2.ambientweather.net';
 		this.api_key = config.api_key;
 		this.api_app_key = config.api_app_key;
@@ -160,7 +161,10 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 					//device.lastData = new sampleData().getData();
 					//**** Testing *****//
 
-					this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
+					if (!this.reconnected) {
+						this.reconnected = true;
+						this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
+					};
 					if (this.showOutdoor && device.lastData.tempf) {
 						uuid = this.genUUID('station');
 						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -421,8 +425,8 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 		let airSensor: Service;
 		let co2Sensor: Service;
 		let batteryStatus: Service;
-		let uuid: any;
-		let index: any;
+		let uuid: string;
+		let index: number;
 
 		try {
 			if (this.showOutdoor && data.tempf) {

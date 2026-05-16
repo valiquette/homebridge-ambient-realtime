@@ -44,30 +44,29 @@ export default class leakSensor {
 		  waterSensor.addService(leakSensor);
 		  leakSensor.addCharacteristic(this.Characteristic.ConfiguredName);
 		  leakSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  leakSensor
-		    .getCharacteristic(this.Characteristic.LeakDetected)
-		    .onGet(this.getStatusLeak.bind(this, leakSensor));
 		}
 		leakSensor
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusActive, active)
 		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
 		  .setCharacteristic(this.Characteristic.LeakDetected, leak);
+		leakSensor
+	    .getCharacteristic(this.Characteristic.LeakDetected)
+	    .onGet(this.getStatusLeak.bind(this, leakSensor));
 
 		let batteryStatus = waterSensor.getService(this.Service.Battery);
 		if(!batteryStatus){
 		  batteryStatus = new this.Service.Battery(name);
 		  waterSensor.addService(batteryStatus);
-
-		  batteryStatus
-		    .getCharacteristic(this.Characteristic.StatusLowBattery)
-		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 		}
 		batteryStatus
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
 		  .setCharacteristic(this.Characteristic.StatusLowBattery, batt)
 			.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
 			.setCharacteristic(this.Characteristic.BatteryLevel, Number(!batt) * 100);
+		batteryStatus
+			.getCharacteristic(this.Characteristic.StatusLowBattery)
+			.onGet(this.getStatusLowBattery.bind(this, batteryStatus, name));
 
 		return waterSensor;
 	}
