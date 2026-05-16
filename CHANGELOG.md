@@ -1,5 +1,11 @@
 # Changes
 
+## 0.2.2
+update
+-  code cleanup
+-  Correct fault display in Homekit
+-  bumped dependencies
+
 ## 0.2.1
 Bug Fixes
 -  fixed station battery charateristic warning

@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, HAPStatus, HapStatusError, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
-import { station } from './devices/station.js';
-import { tempSensor } from './devices/temp.js';
-import { poolSensor } from './devices/pool.js';
-import { soilSensor } from './devices/soil.js';
-import { aqinSensor } from './devices/aqin.js';
-import { airSensor } from './devices/air.js';
-import { airSensorIn } from './devices/air_in.js';
-import { leakSensor } from './devices/leak.js';
-import { motionSensor } from './devices/motion.js';
-import { occupancySensor } from './devices/occupancy.js';
+import station from './devices/station.js';
+import tempSensor from './devices/temp.js';
+import poolSensor from './devices/pool.js';
+import soilSensor from './devices/soil.js';
+import aqinSensor from './devices/aqin.js';
+import airSensor from './devices/air.js';
+import airSensorIn from './devices/air_in.js';
+import leakSensor from './devices/leak.js';
+import motionSensor from './devices/motion.js';
+import occupancySensor from './devices/occupancy.js';
 
 import { io } from 'socket.io-client';
 
@@ -22,12 +22,13 @@ import { io } from 'socket.io-client';
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export class ambientPlatform implements DynamicPlatformPlugin {
+
+export default class ambientPlatform implements DynamicPlatformPlugin {
 	[x: string]: any;
 	public readonly Service: typeof Service;
 	public readonly Characteristic: typeof Characteristic;
-
-	// this is used to track restored cached accessories
+	public readonly HAPStatus!: typeof HAPStatus;
+	public readonly HapStatusError: typeof HapStatusError;
 	public readonly accessories: PlatformAccessory[] = [];
 
 	constructor(
@@ -37,11 +38,13 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 	) {
 		this.Service = api.hap.Service;
 		this.Characteristic = api.hap.Characteristic;
+		this.HapStatusError = api.hap.HapStatusError;
 		this.genUUID = api.hap.uuid.generate;
 
 		this.log.debug('Finished initializing platform:', config.name);
 
 		this.timeStamp = new Date();
+		this.reconnected = false;
 		this.endpoint = 'https://rt2.ambientweather.net';
 		this.api_key = config.api_key;
 		this.api_app_key = config.api_app_key;
@@ -158,7 +161,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					//device.lastData = new sampleData().getData();
 					//**** Testing *****//
 
-					this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
+					if (!this.reconnected) {
+						this.reconnected = true;
+						this.log.info('initial data from subscribed event', JSON.stringify(device.lastData, null, 2));
+					};
 					if (this.showOutdoor && device.lastData.tempf) {
 						uuid = this.genUUID('station');
 						index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -176,7 +182,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -201,7 +207,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device indoor', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -225,7 +231,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device aqin index %s', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 					if (this.showAirIn && device.lastData.pm25_in) {
@@ -248,7 +254,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device aqin', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -272,7 +278,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if (this.accessories[index]) {
 							this.log.debug('Removed cached device aqin', index);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -305,7 +311,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						} else if (this.accessories[index]) {
 							this.log.debug('Removed cached device temp%s', n);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -330,7 +336,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						} else if (this.accessories[index]) {
 							this.log.debug('Removed cached device soil%s', n);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -354,7 +360,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						} else if (this.accessories[index]) {
 							this.log.debug('Removed cached device leak%s', n);
 							this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-							this.accessories.splice(1, index);
+							this.accessories.splice(index, 1);
 						}
 					}
 
@@ -370,7 +376,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 									if ((checkType.value === 'motion' && sensor.type === 1) || (checkType.value === 'occupancy' && sensor.type === 0)) {
 										this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit');
 										this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-										this.accessories.splice(1, index);
+										this.accessories.splice(index, 1);
 									}
 								}
 								if (!this.accessories[index]) {
@@ -395,7 +401,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 								if (this.accessories[index]) {
 									this.log.debug('Removed cached device', index);
 									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
-									this.accessories.splice(1, index);
+									this.accessories.splice(index, 1);
 								}
 							}
 						});
@@ -419,8 +425,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 		let airSensor: Service;
 		let co2Sensor: Service;
 		let batteryStatus: Service;
-		let uuid: any;
-		let index: any;
+		let uuid: string;
+		let index: number;
 
 		try {
 			if (this.showOutdoor && data.tempf) {

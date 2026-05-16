@@ -1,167 +1,171 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CharacteristicValue, PlatformAccessory, Service, Characteristic } from 'homebridge';
-import type { ambientPlatform } from '../ambient_platform.js';
+import type ambientPlatform from '../ambient_platform.js';
 
-export class aqinSensor {
-	public readonly Service!: typeof Service;
-	public readonly Characteristic!: typeof Characteristic;
+export default class aqinSensor {
+	public readonly Service: typeof Service;
+	public readonly Characteristic: typeof Characteristic;
 	constructor(
 		private readonly platform: ambientPlatform,
-	){}
+		private log = platform.log,
+	) {
+		this.Service = platform.Service;
+		this.Characteristic = platform.Characteristic;
+	}
+
 	createAccessory(device: any, uuid: string, aqinSensor: PlatformAccessory) {
 		const name ='Indoor Air Quality';
 		if(!aqinSensor){
-			this.platform.log.info('Adding air quality sensor for %s', device.info.name);
+			this.log.info('Adding air quality sensor for %s', device.info.name);
 			aqinSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.platform.log.debug('Update %s AQIN', `${device.info.name} ${name}`);
+			this.log.debug('Update %s AQIN', `${device.info.name} ${name}`);
 		}
-		aqinSensor.getService(this.platform.Service.AccessoryInformation)!
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
-		  .setCharacteristic(this.platform.Characteristic.SerialNumber, device.macAddress)
-		  .setCharacteristic(this.platform.Characteristic.Model, 'AQIN');
+		aqinSensor.getService(this.Service.AccessoryInformation)!
+		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+		  .setCharacteristic(this.Characteristic.Manufacturer,	this.platform.config.manufacturer ? this.platform.config.manufacturer : 'Ambient')
+		  .setCharacteristic(this.Characteristic.SerialNumber, device.macAddress)
+		  .setCharacteristic(this.Characteristic.Model, 'AQIN');
 
-		let tempSensor = aqinSensor.getService(this.platform.Service.TemperatureSensor);
+		let tempSensor = aqinSensor.getService(this.Service.TemperatureSensor);
 		if(!tempSensor){
-		  tempSensor = new this.platform.Service.TemperatureSensor(name);
+		  tempSensor = new this.Service.TemperatureSensor(name);
 		  aqinSensor.addService(tempSensor);
-		  tempSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  tempSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  tempSensor
-		    .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
-		    .onGet(this.getStatusTemp.bind(this, tempSensor));
+		  tempSensor.addCharacteristic(this.Characteristic.ConfiguredName);
+		  tempSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		}
 		tempSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.CurrentTemperature, ((device.lastData.pm_in_temp_aqin- 32 + .01) * 5 / 9).toFixed(1));
+		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
+		  .setCharacteristic(this.Characteristic.CurrentTemperature, ((device.lastData.pm_in_temp_aqin- 32 + .01) * 5 / 9).toFixed(1));
+	  tempSensor
+			.getCharacteristic(this.Characteristic.CurrentTemperature)
+			.onGet(this.getStatusTemp.bind(this, tempSensor));
 
-		let humSensor = aqinSensor.getService(this.platform.Service.HumiditySensor);
+		let humSensor = aqinSensor.getService(this.Service.HumiditySensor);
 		if(!humSensor){
-		  humSensor = new this.platform.Service.HumiditySensor(name);
+		  humSensor = new this.Service.HumiditySensor(name);
 		  aqinSensor.addService(humSensor);
-		  humSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  humSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  humSensor
-		    .getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
-		    .onGet(this.getStatusHum.bind(this, humSensor));
+		  humSensor.addCharacteristic(this.Characteristic.ConfiguredName);
+		  humSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		}
 
 		humSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, device.lastData.pm_in_humidity_aqin);
+		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
+		  .setCharacteristic(this.Characteristic.CurrentRelativeHumidity, device.lastData.pm_in_humidity_aqin);
+		humSensor
+			.getCharacteristic(this.Characteristic.CurrentRelativeHumidity)
+			.onGet(this.getStatusHum.bind(this, humSensor));
 
-		let airSensor = aqinSensor.getService(this.platform.Service.AirQualitySensor);
+		let airSensor = aqinSensor.getService(this.Service.AirQualitySensor);
 		if(!airSensor){
-		  airSensor = new this.platform.Service.AirQualitySensor(name);
+		  airSensor = new this.Service.AirQualitySensor(name);
 		  aqinSensor.addService(airSensor);
-		  airSensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  airSensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  airSensor
-		    .getCharacteristic(this.platform.Characteristic.AirQuality)
-		    .onGet(this.getStatusAir.bind(this, airSensor));
+		  airSensor.addCharacteristic(this.Characteristic.ConfiguredName);
+		  airSensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		}
 
-		let aqi=this.platform.Characteristic.AirQuality.UNKNOWN;
+		let aqi=this.Characteristic.AirQuality.UNKNOWN;
 		if(device.lastData.aqi_pm25_aqin >300) {
-		  aqi=this.platform.Characteristic.AirQuality.POOR;
+		  aqi=this.Characteristic.AirQuality.POOR;
 		} else if(device.lastData.aqi_pm25_aqin >200) {
-		  aqi=this.platform.Characteristic.AirQuality.POOR;
+		  aqi=this.Characteristic.AirQuality.POOR;
 		} else if(device.lastData.aqi_pm25_aqin >150) {
-		  aqi=this.platform.Characteristic.AirQuality.INFERIOR;
+		  aqi=this.Characteristic.AirQuality.INFERIOR;
 		} else if(device.lastData.aqi_pm25_aqin >100) {
-		  aqi=this.platform.Characteristic.AirQuality.FAIR;
+		  aqi=this.Characteristic.AirQuality.FAIR;
 		} else if(device.lastData.aqi_pm25_aqin >50) {
-		  aqi=this.platform.Characteristic.AirQuality.GOOD;
+		  aqi=this.Characteristic.AirQuality.GOOD;
 		} else if(device.lastData.aqi_pm25_aqin >0) {
-		  aqi=this.platform.Characteristic.AirQuality.EXCELLENT;
+		  aqi=this.Characteristic.AirQuality.EXCELLENT;
 		}
 
 		airSensor
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.AirQuality, aqi)
-		  .setCharacteristic(this.platform.Characteristic.PM10Density, device.lastData.pm10_in_aqin)
-		  .setCharacteristic(this.platform.Characteristic.PM2_5Density, device.lastData.pm25_in_aqin);
+		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
+		  .setCharacteristic(this.Characteristic.AirQuality, aqi)
+		  .setCharacteristic(this.Characteristic.PM10Density, device.lastData.pm10_in_aqin)
+		  .setCharacteristic(this.Characteristic.PM2_5Density, device.lastData.pm25_in_aqin);
+		airSensor
+			.getCharacteristic(this.Characteristic.AirQuality)
+			.onGet(this.getStatusAir.bind(this, airSensor));
 
 
-		let co2Sensor=aqinSensor.getService(this.platform.Service.CarbonDioxideSensor);
+		let co2Sensor=aqinSensor.getService(this.Service.CarbonDioxideSensor);
 		if(!co2Sensor){
-		  co2Sensor = new this.platform.Service.CarbonDioxideSensor(name);
+		  co2Sensor = new this.Service.CarbonDioxideSensor(name);
 		  aqinSensor.addService(co2Sensor);
-		  co2Sensor.addCharacteristic(this.platform.Characteristic.ConfiguredName);
-		  co2Sensor.setCharacteristic(this.platform.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
-		  co2Sensor
-		    .getCharacteristic(this.platform.Characteristic.CarbonDioxideDetected)
-		    .onGet(this.getStatusCo2.bind(this, co2Sensor));
+		  co2Sensor.addCharacteristic(this.Characteristic.ConfiguredName);
+		  co2Sensor.setCharacteristic(this.Characteristic.ConfiguredName, `${device.info.name} ${name}`);
 		}
 
 		let co2;
 		if(device.lastData.co2_in_aqin > 1200){
-		  co2=this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL;
+		  co2=this.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL;
 		} else{
-		  co2=this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL;
+		  co2=this.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL;
 		}
 
 		co2Sensor
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusFault, this.platform.Characteristic.StatusFault.NO_FAULT)
-		  .setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, co2)
-		  .setCharacteristic(this.platform.Characteristic.CarbonDioxideLevel, device.lastData.co2_in_aqin)
-		  .setCharacteristic(this.platform.Characteristic.CarbonDioxidePeakLevel, device.lastData.co2_in_24h_aqin);
+		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+		  .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT)
+		  .setCharacteristic(this.Characteristic.CarbonDioxideDetected, co2)
+		  .setCharacteristic(this.Characteristic.CarbonDioxideLevel, device.lastData.co2_in_aqin)
+		  .setCharacteristic(this.Characteristic.CarbonDioxidePeakLevel, device.lastData.co2_in_24h_aqin);
+		co2Sensor
+			.getCharacteristic(this.Characteristic.CarbonDioxideDetected)
+			.onGet(this.getStatusCo2.bind(this, co2Sensor));
 
-		let batteryStatus = aqinSensor.getService(this.platform.Service.Battery);
+		let batteryStatus = aqinSensor.getService(this.Service.Battery);
 		if(!batteryStatus){
-		  batteryStatus = new this.platform.Service.Battery(name);
+		  batteryStatus = new this.Service.Battery(name);
 		  aqinSensor.addService(batteryStatus);
-
-		  batteryStatus
-		    .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
-		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 		}
 		batteryStatus
-		  .setCharacteristic(this.platform.Characteristic.Name, `${device.info.name} ${name}`)
-		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.batt_co2)
-			.setCharacteristic(this.platform.Characteristic.ChargingState, this.platform.Characteristic.ChargingState.NOT_CHARGEABLE)
-			.setCharacteristic(this.platform.Characteristic.BatteryLevel, (device.lastData.batt_co2) * 100);
+		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
+		  .setCharacteristic(this.Characteristic.StatusLowBattery, !device.lastData.batt_co2)
+			.setCharacteristic(this.Characteristic.ChargingState, this.Characteristic.ChargingState.NOT_CHARGEABLE)
+			.setCharacteristic(this.Characteristic.BatteryLevel, (device.lastData.batt_co2) * 100);
+		batteryStatus
+			.getCharacteristic(this.Characteristic.StatusLowBattery)
+			.onGet(this.getStatusLowBattery.bind(this, batteryStatus));
 
 		return aqinSensor;
 	}
 
 	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
-		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
-			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
+			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentTemperature).value;
 			return currentValue;
 		}
 	}
 
 	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
-		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
-			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value;
+			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value;
 			return currentValue;
 		}
 	}
 
 	async getStatusAir(sensorStatus: Service): Promise<CharacteristicValue> {
-		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
-			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.AirQuality).value;
+			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.AirQuality).value;
 			return currentValue;
 		}
 	}
 
 	async getStatusCo2(sensorStatus: Service): Promise<CharacteristicValue> {
-		if (sensorStatus.getCharacteristic(this.platform.Characteristic.StatusFault).value === this.platform.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
+			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
-			const currentValue: any = sensorStatus.getCharacteristic(this.platform.Characteristic.CarbonDioxideDetected).value;
+			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CarbonDioxideDetected).value;
 			return currentValue;
 		}
 	}
@@ -169,12 +173,12 @@ export class aqinSensor {
 	async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
 		let currentValue: any = 0;
 		try{
-			currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
+			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.platform.log.warn('AQIN Battery Status Low');
+				this.log.warn('AQIN Battery Status Low');
 			}
 		}catch (error) {
-			this.platform.log.error('caught low battery error');
+			this.log.error('caught low battery error');
 		}
 		return currentValue;
 	}

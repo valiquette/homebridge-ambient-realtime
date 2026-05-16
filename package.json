@@ -1,7 +1,7 @@
 {
 	"name": "homebridge-ambient-realtime",
 	"displayName": "Ambient",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"type": "module",
 	"description": "Ambient Weather Realtime API platform plugin for [Homebridge](https://github.com/nfarina/homebridge).",
 	"author": "John Valiquette",
@@ -26,8 +26,8 @@
 	],
 	"main": "dist/index.js",
 	"engines": {
-		"homebridge": "^1.11.0 || ^2.0.0-beta.0",
-		"node": "^20.20.0 || ^22.22.0 ||^24.14.0"
+		"homebridge": "^1.11.0 || ^2.0.0",
+		"node": "^20.20.0 || ^22.22.0 ||^24.15.0"
 	},
 	"scripts": {
 		"build": "rimraf ./dist && tsc",
@@ -35,7 +35,7 @@
 		"prepublishOnly": "npm run lint && npm run build",
 		"watch": "npm run build && npm link && nodemon"
 	},
-		"dependencies": {
+	"dependencies": {
 		"socket.io-client": "^4.8.3"
 	},
 	"devDependencies": {
