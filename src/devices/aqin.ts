@@ -19,7 +19,7 @@ export default class aqinSensor {
 			this.log.info('Adding air quality sensor for %s', device.info.name);
 			aqinSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s AQIN', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name} AQIN`);
 		}
 		aqinSensor.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -136,7 +136,7 @@ export default class aqinSensor {
 
 	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentTemperature).value;
 			return currentValue;
@@ -145,7 +145,7 @@ export default class aqinSensor {
 
 	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value;
 			return currentValue;
@@ -154,7 +154,7 @@ export default class aqinSensor {
 
 	async getStatusAir(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.AirQuality).value;
 			return currentValue;
@@ -163,7 +163,7 @@ export default class aqinSensor {
 
 	async getStatusCo2(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CarbonDioxideDetected).value;
 			return currentValue;

@@ -18,10 +18,10 @@ export default class motionSensor {
 		const motion = value>newSensor.threshold ? true : false;
 
 		if(!motionSensor){
-			this.log.info('Adding custom sensor %s for %s', newSensor.name, device.info.name);
+			this.log.info(`Adding custom sensor ${newSensor.name} for ${device.info.name}`);
 			motionSensor = new this.platform.api.platformAccessory(`${device.info.name} ${newSensor.name}`, uuid);
 		} else{
-			this.log.debug('Update %s custom sensor %s for %s', device.info.name, newSensor.name, newSensor.dataPoint );
+			this.log.debug(`Update ${device.info.name} custom sensor ${newSensor.name} for ${newSensor.dataPoint}`);
 		}
 		motionSensor.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${newSensor.name}`)
@@ -74,7 +74,7 @@ export default class motionSensor {
 
 	async getStatusMotion(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.MotionDetected).value;
 			return currentValue;
@@ -86,7 +86,7 @@ export default class motionSensor {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.log.warn('Leak Detector %s Battery Status Low', name);
+				this.log.warn(`Leak Detector ${name} Battery Status Low`);
 			}
 		}catch (error) {
 			this.log.error('caught low battery error');

@@ -25,10 +25,10 @@ export default class tempSensor {
 		const batt = Number(!device.lastData[`batt${index}`]) || 0;  //1=OK, 0=Low
 
 		if(!indoorSensor){
-			this.log.info('Adding Temp & Humidity sensor %s for %s', name, device.info.name);
+			this.log.info(`Adding Temp & Humidity sensor ${name} for ${device.info.name}`);
 			indoorSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s Temp & Humidity sensor', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name} Temp & Humidity sensor`);
 		}
 		indoorSensor.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -117,7 +117,7 @@ export default class tempSensor {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.log.warn('Temperature Sensor %s Battery Status Low', name);
+				this.log.warn(`Temperature Sensor ${name} Battery Status Low`);
 			}
 		}catch (error) {
 			this.log.error('caught low battery error');

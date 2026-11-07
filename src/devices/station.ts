@@ -16,10 +16,10 @@ export default class station {
 	createAccessory(device: any, uuid: string, weatherStation: PlatformAccessory) {
 		const name = 'Outdoor';
 		 if(!weatherStation){
-			this.log.info('Adding Outdoor sensors for %s', device.info.name);
+			this.log.info(`Adding Outdoor sensors for ${device.info.name}`);
 			weatherStation = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s Weather Station', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name} Weather Station`);
 		}
 			weatherStation.getService(this.Service.AccessoryInformation)!
 			  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -88,7 +88,7 @@ export default class station {
 
 	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentTemperature).value;
 			return currentValue;
@@ -97,7 +97,7 @@ export default class station {
 
 	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value;
 			return currentValue;

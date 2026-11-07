@@ -20,7 +20,7 @@ export default class airSensor {
 			this.log.info('Adding outdoor air quality sensor for %s', device.info.name);
 			airSensorOut = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s PM25', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name} PM25`);
 		}
 		airSensorOut.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -80,7 +80,7 @@ export default class airSensor {
 
 	async getStatusAir(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.AirQuality).value;
 			return currentValue;
