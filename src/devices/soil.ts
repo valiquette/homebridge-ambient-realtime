@@ -21,10 +21,10 @@ export default class soilSensor {
 		const batt = Number(!device.lastData[`battsm${index}`]) || 0;  //1=OK, 0=Low
 
 		if(!soilSensor){
-			this.log.info('Adding Soil Temp & Humidity sensor %s for %s', name, device.info.name);
+			this.log.info(`Adding Soil Temp & Humidity sensor ${name} for ${device.info.name}`);
 			soilSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s Soil Temp & Humidity sensor', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name} Soil Temp & Humidity sensor`);
 		}
 		soilSensor.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -92,7 +92,7 @@ export default class soilSensor {
 
 	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentTemperature).value;
 			return currentValue;
@@ -101,7 +101,7 @@ export default class soilSensor {
 
 	async getStatusHum(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value;
 			return currentValue;
@@ -113,7 +113,7 @@ export default class soilSensor {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.log.warn('Soil Sensor %s Battery Status Low', name);
+				this.log.warn(`Soil Sensor ${name} Battery Status Low`);
 			}
 		}catch (error) {
 			this.log.error('caught low battery error');

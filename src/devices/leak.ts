@@ -27,10 +27,10 @@ export default class leakSensor {
 		}
 
 		if(!waterSensor){
-			this.log.info('Adding leak sensor %s for %s', name, device.info.name);
+			this.log.info(`Adding leak sensor ${name} for ${device.info.name}`);
 			waterSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s leak sensor', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name} leak sensor`);
 		}
 		waterSensor.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -73,7 +73,7 @@ export default class leakSensor {
 
 	async getStatusLeak(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.LeakDetected).value;
 			return currentValue;
@@ -85,7 +85,7 @@ export default class leakSensor {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.log.warn('Leak Detector %s Battery Status Low', name);
+				this.log.warn(`Leak Detector ${name} Battery Status Low`);
 			}
 		}catch (error) {
 			this.log.error('caught low battery error');

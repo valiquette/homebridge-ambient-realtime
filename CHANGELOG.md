@@ -1,9 +1,17 @@
 # Changes
 
+## 0.2.3
+update
+-  code cleanup
+-  bumped dependencies
+-  fixed typo
+-  fixed charateristic error during service communication failure
+-  fixed issue updating station when more than one station is reporting, will have to remove plugin accessories and verify homekit.
+
 ## 0.2.2
 update
 -  code cleanup
--  Correct fault display in Homekit
+-  corrected fault display in Homekit
 -  bumped dependencies
 
 ## 0.2.1

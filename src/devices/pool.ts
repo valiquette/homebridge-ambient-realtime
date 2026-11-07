@@ -19,10 +19,10 @@ export default class poolSensor {
 		const batt = Number(!device.lastData[`batt${index}`]) || 0;  //1=OK, 0=Low
 
 		if(!poolSensor){
-			this.log.info('Adding Waterproof sensor %s for %s', name, device.info.name);
+			this.log.info(`Adding Waterproof sensor ${name} for ${device.info.name}`);
 			poolSensor = new this.platform.api.platformAccessory(`${device.info.name} ${name}`, uuid);
 		} else{
-			this.log.debug('Update %s Waterproof sensor', `${device.info.name} ${name}`);
+			this.log.debug(`Update ${device.info.name} ${name}} Waterproof sensor`);
 		}
 		poolSensor.getService(this.Service.AccessoryInformation)!
 		  .setCharacteristic(this.Characteristic.Name, `${device.info.name} ${name}`)
@@ -71,7 +71,7 @@ export default class poolSensor {
 
 	async getStatusTemp(sensorStatus: Service): Promise<CharacteristicValue> {
 		if (sensorStatus.getCharacteristic(this.Characteristic.StatusFault).value === this.Characteristic.StatusFault.GENERAL_FAULT) {
-			throw new this.platform.HapStatusError(this.platform.HapStatus.SERVICE_COMMUNICATION_FAILURE);
+			throw new this.platform.HapStatusError(this.platform.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 		} else {
 			const currentValue: any = sensorStatus.getCharacteristic(this.Characteristic.CurrentTemperature).value;
 			return currentValue;
@@ -83,7 +83,7 @@ export default class poolSensor {
 		try{
 			currentValue = batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).value;
 			if (currentValue === 1) {
-				this.log.warn('Waterproof Sensor %s Battery Status Low', name);
+				this.log.warn(`Waterproof Sensor ${name} Battery Status Low`);
 			}
 		}catch (error) {
 			this.log.error('caught low battery error');
