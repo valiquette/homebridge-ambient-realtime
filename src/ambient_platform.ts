@@ -137,14 +137,15 @@ export default class ambientPlatform implements DynamicPlatformPlugin {
 		});
 
 		socket.on('data', (data) => {
-			this.log.debug('data',JSON.stringify(data,null,2));
+			//this.log.debug('data',JSON.stringify(data,null,2));
 			if (this.showSocketData) {
-				this.log.debug(`data recieved ${data.date} current outdoor temp ${data.tempf}°F humidity ${data.humidity} battery ${data.battout ? 'good' : 'bad'}`);
+				this.log.debug(`data recieved ${data.date} current outdoor temp ${data.tempf}°F humidity ${data.humidity} battery ${data.battout ? 'bad' : 'good'}`);
 			}
 			//**** Testing *****//
 			//data = new sampleData().getData();
-			//this.log.info(`test data ${data.date} current outdoor temp ${data.tempf}°F humidity ${data.humidity} battery ${data.battout ? 'good' : 'bad'}`);
+			//this.log.info(`test data ${data.date} current outdoor temp ${data.tempf}°F humidity ${data.humidity} battery ${data.battout ? 'bad' : 'good'}`);
 			//**** Testing *****//
+			this.updateStatus(data);
 		});
 
 		socket.on('connect_error', (err) => {

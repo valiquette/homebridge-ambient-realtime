@@ -138,7 +138,7 @@
 				}
 			},
 			"showSocketData":{
-				"title": "Show recived outdoor temperature in debug log",
+				"title": "Show data recieved for outdoor temperature in debug log",
 				"type": "boolean",
 				"default": false
 			}

@@ -1,12 +1,17 @@
 # Changes
 
+## 0.2.4
+update
+-  fixed devices not updating
+-  fixed typo
+
 ## 0.2.3
 update
 -  code cleanup
 -  bumped dependencies
 -  fixed typo
 -  fixed charateristic error during service communication failure
--  fixed issue updating station when more than one station is reporting, will have to remove plugin accessories and verify homekit.
+-  Breaking change. fixed issue updating station when more than one station is reporting, will have to remove plugin accessories and verify homekit.
 
 ## 0.2.2
 update
